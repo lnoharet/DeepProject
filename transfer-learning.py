@@ -364,6 +364,7 @@ def main():
     #shist = [h.cpu().numpy() for h in test_hist]
     plt.plot(val_loss_hist)
     plt.plot(train_loss_hist)
+    plt.savefig("accurate")
     plt.show()
     """
     plt.title("Validation Accuracy vs. Number of Training Epochs")
