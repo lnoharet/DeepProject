@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 from cgi import test
+import random
 
 import torch
 import torch.nn as nn
@@ -209,13 +210,138 @@ def load_image(filename) :
     img = img.convert('RGB')
     return img
 
+def initialize_training():
+    # Load pretrained dataset
+    model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
+    model_ft = model_ft.to(device)
 
+
+    params_to_update = model_ft.parameters()
+    print("Params to learn:")
+    if feature_extract:
+        params_to_update = []
+        for name,param in model_ft.named_parameters():
+            if param.requires_grad == True:
+                params_to_update.append(param)
+                print("\t",name)
+    else:
+        for name,param in model_ft.named_parameters():
+            if param.requires_grad == True:
+                print("\t",name)
+    
+    return model_ft, params_to_update
+        
+
+
+def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
+ 
+        ## COARSE SEARCH
+        coarse_lr = np.arange(1e-4, 1e-1, 1e-2)
+        print(coarse_lr.shape)
+        coarse_val_accuracies = []
+        for lr in coarse_lr:
+            model_ft, params_to_update = initialize_training()
+            # Train model with lr
+            optimizer_ft = optim.Adam(params_to_update, lr=lr)
+            # Setup the loss fxn
+            criterion = nn.CrossEntropyLoss()
+            # Train and evaluate
+            model_ft, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            coarse_val_accuracies.append( hist[-1] )
+            
+        #Plot results
+        plt.scatter(coarse_lr, coarse_val_accuracies)
+        plt.xlabel('lambda')
+        plt.ylabel('val accuracy')
+        plt.savefig('coarse_seach.png')
+        plt.close()
+        for idx, val in enumerate(coarse_val_accuracies):
+            print("(", coarse_lr[idx], ",",val*100, "% )" )
+
+        print()
+        ### FINE RANDOM SEARCH
+        best_3_lr = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-3:])
+
+        l_min, l_max = min(best_3_lr), max(best_3_lr)
+        accs = []
+        etas = []
+        for _ in range(iter):
+            lr = l_min + (l_max - l_min) * random.uniform(0,1)
+            etas.append(lr)
+            model_ft, params_to_update = initialize_training()
+            # Train model with lr
+            optimizer_ft = optim.Adam(params_to_update, lr=lr)
+            # Setup the loss fxn
+            criterion = nn.CrossEntropyLoss()
+            # Train and evaluate
+            model_ft, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            accs.append( hist[-1] )
+
+        for idx, val in enumerate(accs):
+            print("(", etas[idx], ",",val*100, "% )" )
+
+        best_3_lr = np.take(etas, np.argsort(accs)[-3:])
+        print("The 3 best lambda values:", best_3_lr, "and their respective accuracies on validation dataset",np.take(accs, np.argsort(accs)[-3:]))
+
+        #Plot results
+        plt.scatter(etas, accs)
+        plt.xlabel('lr')
+        plt.ylabel('val accuracy')
+        plt.savefig('fine_search.png')
+        plt.close()
+        best_found = (10 ** np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
+        return best_found
+
+def pre_process_dataset(input_size, subset = None):
+    files = ['./data/oxford-iiit-pet/annotations/test.txt', './data/oxford-iiit-pet/annotations/trainval.txt']
+    data = [[] for i in range(len(files))]
+    labels = [[] for i in range(len(files))]
+    for i in range(len(files)):
+        with open(files[i]) as f:
+            lines = f.readlines()
+            if subset:
+                for line in np.random.permutation(lines)[:subset]:
+                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    labels[i].append(label)
+                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+            else:
+                for line in lines:
+                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    labels[i].append(label)
+                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+
+
+    trainingval_data = CustomDataset(
+        split = 'trainval',
+        img_paths=data[1],
+        labels=labels[1],
+        input_size = input_size
+    )
+    test_data = CustomDataset(
+        split = 'test',
+        img_paths=data[0],
+        labels=labels[0],
+        input_size = input_size
+    )
+    # Load training and validation datasets
+    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [len(trainingval_data)//2,len(trainingval_data)//2  ])
+    
+
+
+    # Create training and validation dataloaders
+    dataloaders_dict = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0),
+                        'val':  torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=0)}
+    
+    dataloaders_dictest = {'test': torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=0)}
+
+    return dataloaders_dict, dataloaders_dictest
+    
 
 def main():
     # Load pretrained dataset
     model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
     model_ft = model_ft.to(device)
-
+    """
     trainingval_data = torchvision.datasets.OxfordIIITPet(
         root = "data",
         split = 'trainval',
@@ -242,6 +368,7 @@ def main():
         ])
     )
     """
+    """
     data = []
     labels = []
     data_dir = glob(".\data\oxford-iiit-pet\images\*.jpg")
@@ -255,42 +382,6 @@ def main():
         data.append(image)
         labels.append(label)
     """
-    files = ['./data/oxford-iiit-pet/annotations/test.txt', './data/oxford-iiit-pet/annotations/trainval.txt']
-    data = [[] for i in range(len(files))]
-    labels = [[] for i in range(len(files))]
-    for i in range(len(files)):
-        with open(files[i]) as f:
-            lines = f.readlines()
-        for line in np.random.permutation(lines)[:100]:
-            label = 0 if line.split(" ")[0][0].isupper() else 1  
-            labels[i].append(label)
-            data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
-
-
-
-    trainingval_data = CustomDataset(
-        split = 'trainval',
-        img_paths=data[1],
-        labels=labels[1],
-        input_size = input_size
-    )
-    test_data = CustomDataset(
-        split = 'test',
-        img_paths=data[0],
-        labels=labels[0],
-        input_size = input_size
-    )
-    # Load training and validation datasets
-    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [len(trainingval_data)//2,len(trainingval_data)//2  ])
-    
-
-
-    # Create training and validation dataloaders
-    dataloaders_dict = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0),
-                        'val':  torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=0)}
-    
-    dataloaders_dictest = {'test': torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=0)}
-    
     
     #print(dataloaders_dict['train'])
     #train_features, train_labels = next(iter(dataloaders_dict["train"]))
@@ -330,16 +421,19 @@ def main():
             if param.requires_grad == True:
                 print("\t",name)
 
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=100)
+
+    ### Learning rate search:
+    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
+    print("best_lr", best_lr)
     # Observe that all parameters are being optimized
     ## SGD
     #optimizer_ft = optim.Adam(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
     optimizer_ft = optim.Adam(params_to_update, lr=0.00007)
 
-
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
-    
 
     # Train and evaluate
     model_ft, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
