@@ -261,7 +261,7 @@ def main():
     for i in range(len(files)):
         with open(files[i]) as f:
             lines = f.readlines()
-        for line in np.random.permutation(lines)[:100]:
+        for line in lines:
             label = 0 if line.split(" ")[0][0].isupper() else 1  
             labels[i].append(label)
             data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
@@ -334,7 +334,7 @@ def main():
     ## SGD
     #optimizer_ft = optim.Adam(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=0.00007)
+    optimizer_ft = optim.Adam(params_to_update)
 
 
     # Setup the loss fxn
