@@ -58,6 +58,7 @@ data_dir = "./data/oxford-iiit-pet"
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 # Parameters
 num_classes = 2
 batch_size = 8
