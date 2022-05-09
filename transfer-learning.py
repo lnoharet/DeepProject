@@ -99,9 +99,9 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
             count = 0
             for inputs, labels in dataloaders[phase]:
                 count+=1
-                if count % 10 == 0:
-                    print(count)
-                    print(len(inputs))
+                #if count % 10 == 0:
+                #    print(count)
+                #    print(len(inputs))
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
