@@ -59,6 +59,7 @@ data_dir = "./data/oxford-iiit-pet"
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 # Parameters
 num_classes = 2
 batch_size = 8
@@ -100,9 +101,9 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
             count = 0
             for inputs, labels in dataloaders[phase]:
                 count+=1
-                if count % 10 == 0:
-                    print(count)
-                    print(len(inputs))
+                #if count % 10 == 0:
+                #    print(count)
+                #    print(len(inputs))
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
@@ -382,7 +383,6 @@ def main():
         data.append(image)
         labels.append(label)
     """
-    
     #print(dataloaders_dict['train'])
     #train_features, train_labels = next(iter(dataloaders_dict["train"]))
     #val_features, val_labels = next(iter(dataloaders_dict["val"]))
@@ -430,7 +430,7 @@ def main():
     ## SGD
     #optimizer_ft = optim.Adam(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=0.00007)
+    optimizer_ft = optim.Adam(params_to_update)
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
@@ -458,6 +458,7 @@ def main():
     #shist = [h.cpu().numpy() for h in test_hist]
     plt.plot(val_loss_hist)
     plt.plot(train_loss_hist)
+    plt.savefig("accurate")
     plt.show()
     """
     plt.title("Validation Accuracy vs. Number of Training Epochs")
