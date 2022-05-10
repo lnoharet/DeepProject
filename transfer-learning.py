@@ -431,7 +431,7 @@ def main():
     ## SGD
     #optimizer_ft = optim.Adam(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=best_lr)
+    optimizer_ft = optim.Adam(params_to_update, lr=best_lr[0])
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
