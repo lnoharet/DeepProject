@@ -421,7 +421,7 @@ def main():
             if param.requires_grad == True:
                 print("\t",name)
 
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size)
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=1840)
 
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
@@ -430,7 +430,7 @@ def main():
     ## SGD
     #optimizer_ft = optim.Adam(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update)
+    optimizer_ft = optim.Adam(params_to_update, lr=best_lr)
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
