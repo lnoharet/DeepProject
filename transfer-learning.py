@@ -251,11 +251,11 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             coarse_val_accuracies.append( hist[-1] )
             
         #Plot results
-        plt.scatter(coarse_lr, coarse_val_accuracies)
-        plt.xlabel('lambda')
-        plt.ylabel('val accuracy')
-        plt.savefig('coarse_seach.png')
-        plt.close()
+        #plt.scatter(coarse_lr, coarse_val_accuracies)
+        #plt.xlabel('lambda')
+        #plt.ylabel('val accuracy')
+        #plt.savefig('coarse_seach.png')
+        #plt.close()
         for idx, val in enumerate(coarse_val_accuracies):
             print("(", coarse_lr[idx], ",",val*100, "% )" )
 
@@ -285,11 +285,11 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         print("The 3 best lambda values:", best_3_lr, "and their respective accuracies on validation dataset",np.take(accs, np.argsort(accs)[-3:]))
 
         #Plot results
-        plt.scatter(etas, accs)
-        plt.xlabel('lr')
-        plt.ylabel('val accuracy')
-        plt.savefig('fine_search.png')
-        plt.close()
+        #plt.scatter(etas, accs)
+        #plt.xlabel('lr')
+        #plt.ylabel('val accuracy')
+        #plt.savefig('fine_search.png')
+        #plt.close()
         best_found = (10 ** np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
         return best_found
 
