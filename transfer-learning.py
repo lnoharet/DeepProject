@@ -290,7 +290,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         #plt.ylabel('val accuracy')
         #plt.savefig('fine_search.png')
         #plt.close()
-        best_found = (10 ** np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
+        best_found = (np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
         return best_found
 
 def pre_process_dataset(input_size, subset = None):
