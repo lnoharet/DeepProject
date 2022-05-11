@@ -378,7 +378,7 @@ def main():
                 print("\t",name)
 
     # Change labels of data to be binary for specie classification
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=1840)
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=10)
 
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
