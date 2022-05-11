@@ -234,11 +234,12 @@ def plot_parameter_search(params, accs):
     #plt.close()
     pass
 
-def plot(train, val, mode):
+def plot(train, val, mode, used_lr):
     plt.plot(val, label='val')
     plt.plot(train, label='train')
     plt.xlabel('epoch')
     plt.ylabel(mode)
+    plt.title(mode + ' with lr=' + str(used_lr))
     plt.legend()
     plt.savefig(mode + '.png')
     plt.close()
@@ -395,8 +396,9 @@ def main():
 
     # Train and evaluate
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-    plot(train_loss_hist, val_loss_hist, "loss")
-    plot(train_hist, hist, "acc")
+    plot(train_loss_hist, val_loss_hist, "loss",best_lr[0] )
+    
+    (train_hist, hist, "acc", best_lr[0])
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
