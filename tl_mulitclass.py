@@ -21,7 +21,7 @@ from PIL import Image
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10
+DATA_SUBSET = 1840
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
