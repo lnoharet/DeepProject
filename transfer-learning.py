@@ -76,7 +76,8 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
 
     val_acc_history = []
     train_loss_history = []
-    val_loss_history = []   
+    val_loss_history = [] 
+    train_acc_history = []
 
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
@@ -148,6 +149,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
                 val_acc_history.append(epoch_acc)
             else:
                 train_loss_history.append(epoch_loss)
+                train_acc_history.append(epoch_acc)
 
         print()
 
@@ -157,7 +159,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model, val_acc_history, train_loss_history, val_loss_history
+    return model, train_acc_history, val_acc_history, train_loss_history, val_loss_history
 
 
 def test_model(model, dataloaders):
@@ -256,7 +258,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
-            model_ft, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
             coarse_val_accuracies.append( hist[-1] )
 
         # writes coarse results to txt file
@@ -285,7 +287,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
-            model_ft, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
             accs.append( hist[-1] )
 
         # writes fine search results to txt file
@@ -376,7 +378,7 @@ def main():
                 print("\t",name)
 
     # Change labels of data to be binary for specie classification
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=10)
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=1840)
 
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
@@ -391,9 +393,9 @@ def main():
     criterion = nn.CrossEntropyLoss()
 
     # Train and evaluate
-    model_ft, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+    model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
     plot(train_loss_hist, val_loss_hist, "loss")
-    plot(hist, val_loss_hist, "loss")
+    plot(train_hist, hist)
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
