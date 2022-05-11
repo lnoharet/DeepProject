@@ -241,6 +241,7 @@ def plot(train, val, mode):
     plt.ylabel(mode)
     plt.legend()
     plt.savefig(mode + '.png')
+    plt.close()
     return
 
 
