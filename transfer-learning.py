@@ -225,10 +225,10 @@ def initialize_training():
             if param.requires_grad == True:
                 params_to_update.append(param)
                 #print("\t",name)
-    else:
-        for name,param in model_ft.named_parameters():
-            if param.requires_grad == True:
-                #print("\t",name)
+    #else:
+    #    for name,param in model_ft.named_parameters():
+    #        if param.requires_grad == True:
+    #            #print("\t",name)
     
     return model_ft, params_to_update
         
