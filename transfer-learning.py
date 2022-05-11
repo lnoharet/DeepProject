@@ -27,8 +27,9 @@ class CustomDataset(Dataset):
         if split == 'trainval':
             self.transform = transforms.Compose([
                 # TODO: kolla om det är rätt transforms
-                transforms.RandomResizedCrop(input_size),
-                transforms.RandomHorizontalFlip(),
+                #transforms.RandomResizedCrop(input_size),
+                #transforms.RandomHorizontalFlip(),
+                transforms.Resize(input_size),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
@@ -328,7 +329,7 @@ def pre_process_dataset(input_size, subset = None):
         input_size = input_size
     )
     # Load training and validation datasets
-    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [len(trainingval_data)//2,len(trainingval_data)//2  ])
+    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [len(trainingval_data)*0.8,len(trainingval_data)*0.2  ])
     
 
 
