@@ -224,11 +224,11 @@ def initialize_training():
         for name,param in model_ft.named_parameters():
             if param.requires_grad == True:
                 params_to_update.append(param)
-                print("\t",name)
+                #print("\t",name)
     else:
         for name,param in model_ft.named_parameters():
             if param.requires_grad == True:
-                print("\t",name)
+                #print("\t",name)
     
     return model_ft, params_to_update
         
@@ -258,7 +258,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         #plt.close()
         f = open("coarse.txt", "a")
         for idx, val in enumerate(coarse_val_accuracies):
-            f.write("(", coarse_lr[idx], ",",val*100, "% )" )
+            f.write(str(coarse_lr[idx])+ ", " + str(val*100)+ "%" )
             print("(", coarse_lr[idx], ",",val*100, "% )" )
         f.close()
         
