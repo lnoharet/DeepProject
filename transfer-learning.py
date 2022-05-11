@@ -234,7 +234,7 @@ def initialize_training():
         
 
 
-def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
+def parameter_coarse_to_fine_search(iter, dataloader_dict, params_to_update):
  
         ## COARSE SEARCH
         coarse_lr = np.arange(1e-4, 1e-1, 1e-2)
@@ -290,7 +290,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         plt.ylabel('val accuracy')
         plt.savefig('fine_search.png')
         plt.close()
-        best_found = (10 ** np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
+        best_found = (np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
         return best_found
 
 def pre_process_dataset(input_size, subset = None):
@@ -426,6 +426,8 @@ def main():
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
     print("best_lr", best_lr)
+
+    """
     # Observe that all parameters are being optimized
     ## SGD
     #optimizer_ft = optim.Adam(params_to_update, lr=0.001, momentum=0.9)
@@ -458,7 +460,7 @@ def main():
     #shist = [h.cpu().numpy() for h in test_hist]
     plt.plot(val_loss_hist)
     plt.plot(train_loss_hist)
-    plt.savefig("accurate")
+    plt.savefig("train_val_loss.png")
     plt.show()
     """
     plt.title("Validation Accuracy vs. Number of Training Epochs")
@@ -470,7 +472,7 @@ def main():
     plt.xticks(np.arange(1, num_epochs+1, 1.0))
     plt.legend()
     plt.show()
-    """
+
 
 
     #print(f"Feature batch shape: {train_features.size()}")
