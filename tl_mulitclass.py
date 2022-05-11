@@ -232,7 +232,7 @@ def plot_parameter_search(params, accs):
     #plt.scatter(coarse_lr, coarse_val_accuracies)
     #plt.xlabel('lambda')
     #plt.ylabel('val accuracy')
-    #plt.savefig('coarse_seach.png')
+    #plt.savefig('mul_plots/' +'coarse_seach.png')
     #plt.close()
     pass
 
@@ -243,7 +243,7 @@ def plot(train, val, mode, used_lr):
     plt.ylabel(mode)
     plt.title(mode + ' with lr=' + str(used_lr))
     plt.legend()
-    plt.savefig(mode + '.png')
+    plt.savefig('mul_plots/' + mode + str(round(time.time())) + '.png')
     plt.close()
     return
 
@@ -266,7 +266,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             coarse_val_accuracies.append( hist[-1] )
 
         # writes coarse results to txt file
-        f = open("coarse.txt", "a")
+        f = open("mul_plots/coarse.txt", "a")
         f.write('\n')
         for idx, val in enumerate(coarse_val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
@@ -296,7 +296,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             accs.append( hist[-1] )
 
         # writes fine search results to txt file
-        f = open("fine.txt", "a")
+        f = open("mul_plots/fine.txt", "a")
         f.write('\n')
         for idx, val in enumerate(accs):
             f.write(str(etas[idx])+ ", " + str(val.item()*100)+ "%\n" )
