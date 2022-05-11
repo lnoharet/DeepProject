@@ -424,7 +424,7 @@ def main():
             if param.requires_grad == True:
                 print("\t",name)
 
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=2)#1840
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=1840)
 
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
