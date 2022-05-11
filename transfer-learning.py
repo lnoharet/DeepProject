@@ -18,6 +18,24 @@ import copy
 from glob import glob
 from PIL import Image
 
+
+# Top level data directory.
+data_dir = "./data/oxford-iiit-pet"
+DATA_SUBSET = 1840
+
+# Models from [resnet18, resnet34]
+model_name = "resnet18"
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+# Parameters
+num_classes = 2
+batch_size = 8
+num_epochs = 15
+
+# Flag for feature extracting. 
+feature_extract = False
+
+
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
             
@@ -50,21 +68,6 @@ class CustomDataset(Dataset):
         image = self.transform(image)
         return image, label
 
-
-# Top level data directory.
-data_dir = "./data/oxford-iiit-pet"
-
-# Models from [resnet18, resnet34]
-model_name = "resnet18"
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-# Parameters
-num_classes = 2
-batch_size = 8
-num_epochs = 15
-
-# Flag for feature extracting. 
-feature_extract = False
 
 def set_parameter_requires_grad(model, feature_extracting):
     if feature_extracting:
@@ -380,7 +383,7 @@ def main():
                 print("\t",name)
 
     # Change labels of data to be binary for specie classification
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=10)
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
