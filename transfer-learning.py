@@ -268,6 +268,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
 
         # writes coarse results to txt file
         f = open("coarse.txt", "a")
+        f.write('\n')
         for idx, val in enumerate(coarse_val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
             print("(", coarse_lr[idx], ",",val.item()*100, "% )" )
@@ -297,6 +298,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
 
         # writes fine search results to txt file
         f = open("fine.txt", "a")
+        f.write('\n')
         for idx, val in enumerate(accs):
             f.write(str(etas[idx])+ ", " + str(val.item()*100)+ "%\n" )
             print("(", etas[idx], ",",val.item()*100, "% )" )
