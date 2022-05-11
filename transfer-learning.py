@@ -256,10 +256,13 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         #plt.ylabel('val accuracy')
         #plt.savefig('coarse_seach.png')
         #plt.close()
+        f = open("coarse.txt", "a")
         for idx, val in enumerate(coarse_val_accuracies):
+            f.write("(", coarse_lr[idx], ",",val*100, "% )" )
             print("(", coarse_lr[idx], ",",val*100, "% )" )
-
-        print()
+        f.close()
+        
+        return (0,0)
         ### FINE RANDOM SEARCH
         best_3_lr = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-3:])
 
@@ -421,7 +424,7 @@ def main():
             if param.requires_grad == True:
                 print("\t",name)
 
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=1840)
+    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=2)#1840
 
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
