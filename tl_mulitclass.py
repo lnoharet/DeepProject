@@ -393,16 +393,17 @@ def main():
     ## SGD
     #optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=0.0001)
+    used_lr = 0.0001
+    optimizer_ft = optim.Adam(params_to_update, lr = used_lr)
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
 
     # Train and evaluate
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-    plot(train_loss_hist, val_loss_hist, "loss",best_lr[0] )
+    plot(train_loss_hist, val_loss_hist, "loss",used_lr )
     
-    (train_hist, hist, "acc", best_lr[0])
+    (train_hist, hist, "acc", used_lr)
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
