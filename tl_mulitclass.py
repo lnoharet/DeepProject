@@ -21,7 +21,7 @@ from PIL import Image
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10
+DATA_SUBSET = 1840
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
@@ -402,8 +402,8 @@ def main():
     # Train and evaluate
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
     plot(train_loss_hist, val_loss_hist, "loss",used_lr )
+    plot(train_hist, hist, "acc", used_lr)
     
-    (train_hist, hist, "acc", used_lr)
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
