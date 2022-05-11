@@ -28,13 +28,12 @@ model_name = "resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
-num_classes = 2
+num_classes = 37
 batch_size = 8
 num_epochs = 15
 
 # Flag for feature extracting. 
 feature_extract = False
-
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
@@ -227,15 +226,15 @@ def initialize_training():
     
     return model_ft, params_to_update
         
-def plot_parameter_search(params, accs, ):
-    # TODO
+def plot_parameter_search(params, accs):
+        # TODO
     #Plot results
     #plt.scatter(coarse_lr, coarse_val_accuracies)
     #plt.xlabel('lambda')
     #plt.ylabel('val accuracy')
-    #plt.savefig('bin_plots/coarse_seach' + str(round(time.time())) +'.png')
+    #plt.savefig('mul_plots/' +'coarse_seach.png')
     #plt.close()
-    return
+    pass
 
 def plot(train, val, mode, used_lr):
     plt.plot(val, label='val')
@@ -244,7 +243,7 @@ def plot(train, val, mode, used_lr):
     plt.ylabel(mode)
     plt.title(mode + ' with lr=' + str(used_lr))
     plt.legend()
-    plt.savefig('bin_plots/' + mode + str(round(time.time())) + '.png')
+    plt.savefig('mul_plots/' + mode + str(round(time.time())) + '.png')
     plt.close()
     return
 
@@ -267,7 +266,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             coarse_val_accuracies.append( hist[-1] )
 
         # writes coarse results to txt file
-        f = open("bin_plots/coarse.txt", "a")
+        f = open("mul_plots/coarse.txt", "a")
         f.write('\n')
         for idx, val in enumerate(coarse_val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
@@ -297,7 +296,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             accs.append( hist[-1] )
 
         # writes fine search results to txt file
-        f = open("bin_plots/fine.txt", "a")
+        f = open("mul_plots/fine.txt", "a")
         f.write('\n')
         for idx, val in enumerate(accs):
             f.write(str(etas[idx])+ ", " + str(val.item()*100)+ "%\n" )
@@ -321,12 +320,12 @@ def pre_process_dataset(input_size, subset = None):
             lines = f.readlines()
             if subset:
                 for line in np.random.permutation(lines)[:subset]:
-                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    label = int(line.split(" ")[1]) - 1
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
             else:
                 for line in lines:
-                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    label = int(line.split(" ")[1]) - 1
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
 
@@ -388,22 +387,23 @@ def main():
     dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     ### Learning rate search:
-    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
-    print("best_lr", best_lr)
+    #best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
+    #print("best_lr", best_lr)
 
     ## SGD
     #optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=best_lr[0])
+    used_lr = 0.0001
+    optimizer_ft = optim.Adam(params_to_update, lr = used_lr)
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
 
     # Train and evaluate
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-    plot(train_loss_hist, val_loss_hist, "loss",best_lr[0] )
+    plot(train_loss_hist, val_loss_hist, "loss",used_lr )
+    plot(train_hist, hist, "acc", used_lr)
     
-    (train_hist, hist, "acc", best_lr[0])
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
@@ -445,7 +445,6 @@ with open('data/oxford-iiit-pet/annotations/list.txt') as f:
     for _, line in enumerate(lines[6:],6):
         tokens = line.split(' ')
         id_to_specie[str(int(tokens[1])-1)] = int(tokens[2])-1
-
 # Convert Class id to specie ID in train and val datasets
 for idx, lab in enumerate(train_labels):
     train_labels[idx]=(id_to_specie[str(lab.item())])
