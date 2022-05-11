@@ -258,7 +258,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         #plt.close()
         f = open("coarse.txt", "a")
         for idx, val in enumerate(coarse_val_accuracies):
-            f.write(str(coarse_lr[idx])+ ", " + str(val*100)+ "%" )
+            f.write(str(coarse_lr[idx])+ ", " + str(val[0]*100)+ "%\n" )
             print("(", coarse_lr[idx], ",",val*100, "% )" )
         f.close()
         
