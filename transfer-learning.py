@@ -246,7 +246,7 @@ def plot(train, val, mode):
 def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
  
         ## COARSE SEARCH
-        coarse_lr = np.arange(1e-4, 1e-1, 1e-2)
+        coarse_lr = np.arange(1e-5, 1e-3, 1e-4)
         print(coarse_lr.shape)
         coarse_val_accuracies = []
         for lr in coarse_lr:
@@ -392,7 +392,8 @@ def main():
 
     # Train and evaluate
     model_ft, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-    
+    plot(train_loss_hist, val_loss_hist, "loss")
+    plot(hist, val_loss_hist, "loss")
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
