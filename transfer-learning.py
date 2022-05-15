@@ -22,6 +22,7 @@ from PIL import Image
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = 1840
+coarse_lr = np.array([0.000001,0.000002,0.000003,0.000004,0.000005,0.000006,0.000007,0.000008,0.000009])
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
@@ -253,7 +254,8 @@ def plot(train, val, mode, used_lr):
 def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
  
         ## COARSE SEARCH
-        coarse_lr = np.array([0.00001,0.00003,0.00005,0.00007,0.00009, 0.0001, 0.0003, 0.0005, 0.0007, 0.0009])#np.arange(1e-5, 1e-4, 1e-5)
+        print(coarse_lr)
+        #np.arange(1e-5, 1e-4, 1e-5)
         print(coarse_lr.shape)
         coarse_val_accuracies = []
         for lr in coarse_lr:
