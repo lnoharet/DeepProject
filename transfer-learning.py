@@ -23,7 +23,7 @@ from PIL import Image
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
-coarse_lr = np.array([0.000001,0.000002,0.000003,0.000004,0.000005,0.000006,0.000007,0.000008,0.000009])
+coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 
 l_max = 0.000022
 l_min = 0.000027
@@ -400,9 +400,10 @@ def main():
     dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     ### Learning rate search:
-    #best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update, dataloaders_dictest)
-    #print("best_lr", best_lr)
-    used_lr = 2.39671411e-05
+    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update, dataloaders_dictest)
+    print("best_lr", best_lr)
+    used_lr = best_lr
+    #used_lr = 2.39671411e-05
 
     ## SGD
     #optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
