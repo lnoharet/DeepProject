@@ -23,7 +23,7 @@ PARAM_SEARCH = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10 # None = whole dataset
+DATA_SUBSET = 100 # None = whole dataset
 default_lr = 0.001
 
 """ SEARCH PARAMS """
@@ -46,7 +46,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 8
+batch_size = 32
 num_epochs = 15
 
 class CustomDataset(Dataset):
@@ -374,7 +374,7 @@ def main():
     # Eval model on test data
     print('--- Testing model on testdata ---')
     test_hist = test_model(model_ft, test_data)
-    print("Test Acc = ", test_hist[-1].item())
+    print("Test Acc = ", test_hist[-1].item()*100)
 
 
 
