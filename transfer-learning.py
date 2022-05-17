@@ -21,7 +21,7 @@ from PIL import Image
 torch.manual_seed(1337)
 
 """ Runnning Options """
-PARAM_SEARCH = False
+PARAM_SEARCH = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -32,7 +32,7 @@ default_lr = 0.001
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
-coarse_lr = np.array([0.0009, 0.0095, 0.001, 0.0015, 0.002])
+coarse_lr = np.array([0.0009, 0.0095])
 
 l_max = 0.000022
 l_min = 0.000027
@@ -262,8 +262,10 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
         ## COARSE SEARCH
         print('--- PARAMETER SEARCH ---')
         print('Searched parameters:', coarse_lr)
+ 
+        val_accuracies = [] 
 
-        coarse_val_accuracies = []
+
         for lr in coarse_lr:
             model_ft, _, params_to_update = initialize_model(model_name, num_classes)
             # Train model with lr
@@ -271,20 +273,26 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
-            model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
-            coarse_val_accuracies.append( hist[-1] )
-            print(test_model(model_ft, test_data)[-1])
+            model_ft, train_hist, hist, train_loss, val_loss = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
+            
+            test_acc = test_model(model_ft, test_data)[-1].item()*100
+
+            plot(train_loss, val_loss, 'loss', lr, test_acc)
+            plot(train_hist, hist, 'acc', lr, test_acc)
+
+            val_accuracies.append( hist[-1] )
+            
 
         # writes coarse results to txt file
         f = open("bin_plots/coarse.txt", "a")
         f.write('\n')
-        for idx, val in enumerate(coarse_val_accuracies):
+        for idx, val in enumerate(val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
             print("(", coarse_lr[idx], ",",val.item()*100, "% )" )
         f.close()
 
-        plot_parameter_search(coarse_lr, coarse_val_accuracies )
-        best_found = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-1:])
+        plot_parameter_search(coarse_lr, val_accuracies )
+        best_found = np.take(coarse_lr, np.argsort(val_accuracies)[-1:])
 
         return best_found
 
