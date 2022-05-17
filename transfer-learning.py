@@ -28,7 +28,8 @@ DATA_SUBSET = None # None = whole dataset
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
-coarse_lr = np.array([0.0009, 0.0095, 0.001, 0.0015, 0.002])
+#coarse_lr = np.array([0.0009, 0.0095, 0.001, 0.0015, 0.002])
+coarse_lr = np.array([0.001])
 
 l_max = 0.000022
 l_min = 0.000027
@@ -45,7 +46,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 8
+batch_size = 16
 num_epochs = 15
 
 class CustomDataset(Dataset):
