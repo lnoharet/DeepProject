@@ -19,11 +19,12 @@ from glob import glob
 from PIL import Image
 
 """ Runnning Options """
-PARAM_SEARCH = True
+PARAM_SEARCH = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = None # None = whole dataset
+DATA_SUBSET = 1 # None = whole dataset
+default_lr = 0.001
 
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
@@ -45,7 +46,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 8
+batch_size = 32
 num_epochs = 15
 
 class CustomDataset(Dataset):
@@ -358,7 +359,7 @@ def main():
         print("Parameter search yielded best lr =", best_lr[0])
         used_lr = best_lr[0]
     else:
-        used_lr = 2.39671411e-05
+        used_lr = default_lr
 
     ## Adam
     optimizer_ft = optim.Adam(params_to_update, lr=used_lr)
