@@ -374,7 +374,7 @@ def main():
     # Eval model on test data
     print('--- Testing model on testdata ---')
     test_hist = test_model(model_ft, test_data)
-    print("Test Acc = ", test_hist[-1].numpy()[0])
+    print("Test Acc = ", test_hist[-1].item())
 
 
 
