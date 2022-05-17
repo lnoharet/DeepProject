@@ -23,7 +23,7 @@ PARAM_SEARCH = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = None
+DATA_SUBSET = None # None = whole dataset
 
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
@@ -252,7 +252,8 @@ def plot(train, val, mode, used_lr):
 def parameter_search(dataloader_dict, params_to_update, test_data):
  
         ## COARSE SEARCH
-        print(coarse_lr)
+        print('--- PARAMETER SEARCH ---')
+        print('Searched parameters:', coarse_lr)
 
         coarse_val_accuracies = []
         for lr in coarse_lr:
@@ -275,7 +276,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
         f.close()
 
         plot_parameter_search(coarse_lr, coarse_val_accuracies )
-        best_found = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-1:])[0]
+        best_found = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-1:])
 
         return best_found
 
@@ -351,7 +352,7 @@ def main():
     if PARAM_SEARCH:
         ### Learning rate search:
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
-        print("best_lr", best_lr)
+        print("Parameter search yielded best lr =", best_lr[0])
         used_lr = best_lr[0]
     else:
         used_lr = 2.39671411e-05
@@ -362,10 +363,12 @@ def main():
     criterion = nn.CrossEntropyLoss()
 
     # Train and evaluate
+    print('--- Training with adam ---')
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
     plot(train_loss_hist, val_loss_hist, "loss", used_lr)
     
     # Eval model on test data
+    print('--- Testing model on testdata ---')
     test_hist = test_model(model_ft, test_data)
     print(test_hist)
 
