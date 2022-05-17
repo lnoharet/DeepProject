@@ -27,7 +27,7 @@ coarse_lr = np.array([0.000001,0.000002,0.000003,0.000004,0.000005,0.000006,0.00
 
 l_max = 0.000022
 l_min = 0.000027
-coarse_lr = []
+coarse_lr = np.array([])
 for i in range(0,5):
     lr = l_min + (l_max-l_min)*random.uniform(0,1)
     coarse_lr.append(lr)
