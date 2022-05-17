@@ -372,23 +372,23 @@ def main():
     else:
         used_lr = default_lr
 
-    ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=used_lr)
-    # Setup the loss fxn
-    criterion = nn.CrossEntropyLoss()
+        ## Adam
+        optimizer_ft = optim.Adam(params_to_update, lr=used_lr)
+        # Setup the loss fxn
+        criterion = nn.CrossEntropyLoss()
 
-    # Train and evaluate
-    print('--- Training with adam ---')
-    model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+        # Train and evaluate
+        print('--- Training with adam ---')
+        model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
 
 
-    # Eval model on test data
-    print('--- Testing model on testdata ---')
-    test_acc = test_model(model_ft, test_data)[-1].item()*100
-    print("Test Acc = ", test_acc)
+        # Eval model on test data
+        print('--- Testing model on testdata ---')
+        test_acc = test_model(model_ft, test_data)[-1].item()*100
+        print("Test Acc = ", test_acc)
 
-    plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
-    plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
+        plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
+        plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
 
 
 
