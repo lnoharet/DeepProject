@@ -22,21 +22,18 @@ from PIL import Image
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = 1840
-#coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
-coarse_lr = np.array([0.000001,0.000002,0.000003,0.000004,0.000005,0.000006,0.000007,0.000008,0.000009])
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
-num_classes = 2
+num_classes = 37
 batch_size = 8
 num_epochs = 15
 
 # Flag for feature extracting. 
 feature_extract = False
-
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
@@ -229,15 +226,15 @@ def initialize_training():
     
     return model_ft, params_to_update
         
-def plot_parameter_search(params, accs, ):
-    # TODO
+def plot_parameter_search(params, accs):
+        # TODO
     #Plot results
     #plt.scatter(coarse_lr, coarse_val_accuracies)
     #plt.xlabel('lambda')
     #plt.ylabel('val accuracy')
-    #plt.savefig('bin_plots/coarse_seach' + str(round(time.time())) +'.png')
+    #plt.savefig('mul_plots/' +'coarse_seach.png')
     #plt.close()
-    return
+    pass
 
 def plot(train, val, mode, used_lr):
     plt.plot(val, label='val')
@@ -246,17 +243,16 @@ def plot(train, val, mode, used_lr):
     plt.ylabel(mode)
     plt.title(mode + ' with lr=' + str(used_lr))
     plt.legend()
-    plt.savefig('bin_plots/' + mode + str(round(time.time())) + '.png')
+    plt.savefig('mul_plots/' + mode + str(round(time.time())) + '.png')
     plt.close()
     return
 
 
 
-def parameter_coarse_to_fine_search(iter, dataloader_dict, params_to_update):
+def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
  
         ## COARSE SEARCH
-        print(coarse_lr)
-        #np.arange(1e-5, 1e-4, 1e-5)
+        coarse_lr = np.array([0.00001,0.00003,0.00005,0.00007,0.00009, 0.0001, 0.0003, 0.0005, 0.0007, 0.0009])#np.arange(1e-5, 1e-4, 1e-5)
         print(coarse_lr.shape)
         coarse_val_accuracies = []
         for lr in coarse_lr:
@@ -270,7 +266,7 @@ def parameter_coarse_to_fine_search(iter, dataloader_dict, params_to_update):
             coarse_val_accuracies.append( hist[-1] )
 
         # writes coarse results to txt file
-        f = open("bin_plots/coarse.txt", "a")
+        f = open("mul_plots/coarse.txt", "a")
         f.write('\n')
         for idx, val in enumerate(coarse_val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
@@ -300,7 +296,7 @@ def parameter_coarse_to_fine_search(iter, dataloader_dict, params_to_update):
             accs.append( hist[-1] )
 
         # writes fine search results to txt file
-        f = open("bin_plots/fine.txt", "a")
+        f = open("mul_plots/fine.txt", "a")
         f.write('\n')
         for idx, val in enumerate(accs):
             f.write(str(etas[idx])+ ", " + str(val.item()*100)+ "%\n" )
@@ -308,7 +304,6 @@ def parameter_coarse_to_fine_search(iter, dataloader_dict, params_to_update):
         f.close()
 
         best_3_lr = np.take(etas, np.argsort(accs)[-3:])
-
         print("The 3 best lr values:", best_3_lr, "and their respective accuracies on validation dataset",np.take(accs, np.argsort(accs)[-3:]))
 
         plot_parameter_search(etas, accs)
@@ -325,12 +320,12 @@ def pre_process_dataset(input_size, subset = None):
             lines = f.readlines()
             if subset:
                 for line in np.random.permutation(lines)[:subset]:
-                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    label = int(line.split(" ")[1]) - 1
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
             else:
                 for line in lines:
-                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    label = int(line.split(" ")[1]) - 1
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
 
@@ -392,22 +387,23 @@ def main():
     dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     ### Learning rate search:
-    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
-    print("best_lr", best_lr)
+    #best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
+    #print("best_lr", best_lr)
 
     ## SGD
     #optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    optimizer_ft = optim.Adam(params_to_update, lr=best_lr[0])
+    used_lr = 0.0001
+    optimizer_ft = optim.Adam(params_to_update, lr = used_lr)
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
 
     # Train and evaluate
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-    plot(train_loss_hist, val_loss_hist, "loss",best_lr[0] )
+    plot(train_loss_hist, val_loss_hist, "loss",used_lr )
+    plot(train_hist, hist, "acc", used_lr)
     
-    (train_hist, hist, "acc", best_lr[0])
     # Eval model on test data
     test_hist = test_model(model_ft, dataloaders_dictest)
     print(test_hist)
@@ -432,26 +428,6 @@ def main():
 
     #ohist = [h.cpu().numpy() for h in hist]
     #shist = [h.cpu().numpy() for h in test_hist]
-<<<<<<< HEAD
-    plt.plot(val_loss_hist)
-    plt.plot(train_loss_hist)
-    plt.savefig("train_val_loss.png")
-    plt.show()
-    """
-    """
-    plt.title("Validation Accuracy vs. Number of Training Epochs")
-    plt.xlabel("Training Epochs")
-    plt.ylabel("Validation Accuracy")
-    plt.plot(range(1,num_epochs+1),ohist,label="Pretrained")
-    plt.plot(range(1,num_epochs+1),shit,label="Test")
-    plt.ylim((0,1.))
-    plt.xticks(np.arange(1, num_epochs+1, 1.0))
-    plt.legend()
-    plt.show()
-    """
-
-=======
->>>>>>> 93ed5a3ae8e87ee9b890eed62e39f210e06389bc
 
 
     
@@ -469,7 +445,6 @@ with open('data/oxford-iiit-pet/annotations/list.txt') as f:
     for _, line in enumerate(lines[6:],6):
         tokens = line.split(' ')
         id_to_specie[str(int(tokens[1])-1)] = int(tokens[2])-1
-
 # Convert Class id to specie ID in train and val datasets
 for idx, lab in enumerate(train_labels):
     train_labels[idx]=(id_to_specie[str(lab.item())])
