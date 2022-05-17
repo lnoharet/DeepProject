@@ -249,7 +249,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.plot(train, label='train')
     plt.xlabel('epoch')
     plt.ylabel(mode)
-    plt.title(mode + ' with lr=' + str(used_lr) + 'n_batch=' + str(batch_size) + 'test_acc=' + test_acc)
+    plt.title(mode + ' with lr=' + str(used_lr) + 'n_batch=' + str(batch_size) + 'test_acc=' + str(test_acc))
     plt.legend()
     plt.savefig('bin_plots/' + mode + str(round(time.time()) - 1600000000) + '.png')
     plt.close()
