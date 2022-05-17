@@ -25,7 +25,7 @@ PARAM_SEARCH = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = None # None = whole dataset
+DATA_SUBSET = 10 # None = whole dataset
 default_lr = 0.001
 
 
@@ -49,7 +49,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 16
+batch_size = 8
 num_epochs = 10
 
 class CustomDataset(Dataset):
@@ -244,12 +244,12 @@ def plot_parameter_search(params, accs, ):
     #plt.close()
     return
 
-def plot(train, val, mode, used_lr):
+def plot(train, val, mode, used_lr, test_acc):
     plt.plot(val, label='val')
     plt.plot(train, label='train')
     plt.xlabel('epoch')
     plt.ylabel(mode)
-    plt.title(mode + ' with lr=' + str(used_lr))
+    plt.title(mode + ' with lr=' + str(used_lr) + 'n_batch=' + str(batch_size) + 'test_acc=' + test_acc)
     plt.legend()
     plt.savefig('bin_plots/' + mode + str(round(time.time()) - 1600000000) + '.png')
     plt.close()
@@ -372,14 +372,15 @@ def main():
     # Train and evaluate
     print('--- Training with adam ---')
     model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-    plot(train_loss_hist, val_loss_hist, "loss", used_lr)
-    plot(train_hist, hist, "acc", used_lr)
+
 
     # Eval model on test data
     print('--- Testing model on testdata ---')
-    test_hist = test_model(model_ft, test_data)
-    print("Test Acc = ", test_hist[-1].item()*100)
+    test_acc = test_model(model_ft, test_data)[-1].item()*100
+    print("Test Acc = ", test_acc)
 
+    plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
+    plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
 
 
 
