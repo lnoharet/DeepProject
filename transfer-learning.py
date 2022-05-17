@@ -21,7 +21,7 @@ from PIL import Image
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 1840
+DATA_SUBSET = 10
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 coarse_lr = np.array([0.000001,0.000002,0.000003,0.000004,0.000005,0.000006,0.000007,0.000008,0.000009])
 
@@ -260,7 +260,7 @@ def plot(train, val, mode, used_lr):
 
 
 
-def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
+def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update, dataloaders_dictest):
  
         ## COARSE SEARCH
         print(coarse_lr)
@@ -276,7 +276,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             # Train and evaluate
             model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
             coarse_val_accuracies.append( hist[-1] )
-            print(test_model(model_ft, dataloaders_dict_test)[-1])
+            print(test_model(model_ft, dataloaders_dictest)[-1])
 
         # writes coarse results to txt file
         f = open("bin_plots/coarse.txt", "a")
@@ -400,7 +400,7 @@ def main():
     dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     ### Learning rate search:
-    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update)
+    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update, dataloaders_dictest)
     print("best_lr", best_lr)
 
     ## SGD
