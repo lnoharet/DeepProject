@@ -29,7 +29,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 37
-batch_size = 16
+batch_size = 8
 num_epochs = 15
 
 # Flag for feature extracting. 
@@ -252,8 +252,8 @@ def plot(train, val, mode, used_lr):
 def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update):
  
         ## COARSE SEARCH
-        #coarse_lr = np.array([0.00001,0.00003,0.00005,0.00007,0.00009, 0.0001, 0.0003, 0.0005, 0.0007, 0.0009])#np.arange(1e-5, 1e-4, 1e-5)
-        np.array([0.001])
+        coarse_lr = np.array([0.00001,0.00003,0.00005,0.00007,0.00009, 0.0001, 0.0003, 0.0005, 0.0007, 0.0009])#np.arange(1e-5, 1e-4, 1e-5)
+        
         print(coarse_lr.shape)
         coarse_val_accuracies = []
         for lr in coarse_lr:
