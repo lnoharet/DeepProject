@@ -28,8 +28,7 @@ DATA_SUBSET = None # None = whole dataset
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
-#coarse_lr = np.array([0.0009, 0.0095, 0.001, 0.0015, 0.002])
-coarse_lr = np.array([0.001])
+coarse_lr = np.array([0.0009, 0.0095, 0.001, 0.0015, 0.002])
 
 l_max = 0.000022
 l_min = 0.000027
@@ -46,7 +45,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 16
+batch_size = 8
 num_epochs = 15
 
 class CustomDataset(Dataset):
@@ -90,7 +89,7 @@ def freeze_all_params(model):
     for param in model.parameters():
         param.requires_grad = False
 
-def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False):
+def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False, used_lr = None):
     since = time.time()
 
     val_acc_history = []
@@ -102,7 +101,11 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
     best_acc = 0.0
 
     for epoch in range(num_epochs):
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        if PARAM_SEARCH:
+            print('Epoch {}/{} lr = {}'.format(epoch, num_epochs - 1, used_lr))
+        else:
+            print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+
         print('-' * 10)
 
         # Each epoch has a training and validation phase
@@ -264,7 +267,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
-            model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
             coarse_val_accuracies.append( hist[-1] )
             print(test_model(model_ft, test_data)[-1])
 
@@ -316,7 +319,6 @@ def pre_process_dataset(input_size, subset = None):
     # Load training and validation datasets
     train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.8),int(len(trainingval_data)*0.2 ) ])
     
-
 
     # Create training and validation dataloaders
     dataloaders_dict = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0),
@@ -371,7 +373,7 @@ def main():
     # Eval model on test data
     print('--- Testing model on testdata ---')
     test_hist = test_model(model_ft, test_data)
-    print(test_hist)
+    print("Test Acc = ", test_hist[-1].numpy()[0])
 
 
 
