@@ -25,6 +25,12 @@ DATA_SUBSET = 1840
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 coarse_lr = np.array([0.000001,0.000002,0.000003,0.000004,0.000005,0.000006,0.000007,0.000008,0.000009])
 
+
+coarse_lr = []
+for i in range(0,5):
+    n = random.randint(2e-05,3e-05)
+    randomlist.append(n)
+
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
