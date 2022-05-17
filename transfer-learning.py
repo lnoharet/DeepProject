@@ -27,11 +27,11 @@ coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.
 
 l_max = 0.000022
 l_min = 0.000027
-coarse_lr = []
-for i in range(0,5):
-    lr = l_min + (l_max-l_min)*random.uniform(0,1)
-    coarse_lr.append(lr)
-coarse_lr = np.array(coarse_lr)
+#coarse_lr = []
+#for i in range(0,5):
+#    lr = l_min + (l_max-l_min)*random.uniform(0,1)
+#    coarse_lr.append(lr)
+#coarse_lr = np.array(coarse_lr)
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
