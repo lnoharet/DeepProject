@@ -43,10 +43,6 @@ num_classes = 2
 batch_size = 8
 num_epochs = 15
 
-# Flag for feature extracting. 
-feature_extract = True
-
-
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
             
@@ -79,11 +75,14 @@ class CustomDataset(Dataset):
         image = self.transform(image)
         return image, label
 
+def load_image(filename) :
+    img = Image.open(filename)
+    img = img.convert('RGB')
+    return img
 
-def set_parameter_requires_grad(model, feature_extracting):
-    if feature_extracting:
-        for param in model.parameters():
-            param.requires_grad = False
+def freeze_all_params(model):
+    for param in model.parameters():
+        param.requires_grad = False
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False):
     since = time.time()
@@ -193,7 +192,7 @@ def test_model(model, dataloaders):
     return acc_history
 
 
-def initialize_model(model_name, num_classes, feature_extract, use_pretrained=True):
+def initialize_model(model_name, num_classes, use_pretrained=True):
     # Initialize these variables which will be set in this if statement. Each of these
     #   variables is model specific.
     model_ft = None
@@ -206,37 +205,19 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         """ Resnet34 """
         model_ft = models.resnet34(pretrained=use_pretrained)
 
-    set_parameter_requires_grad(model_ft, feature_extract)
+    freeze_all_params(model_ft)
+    
+    """ Set layers to be fine-tuned """
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
 
-    return model_ft, input_size
+    params_to_update = []
+    for name,param in model_ft.named_parameters():
+        if param.requires_grad == True:
+            params_to_update.append(param)
 
-def load_image(filename) :
-    img = Image.open(filename)
-    img = img.convert('RGB')
-    return img
-
-def initialize_training():
-    # Load pretrained dataset
-    model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
-    model_ft = model_ft.to(device)
-
-    params_to_update = model_ft.parameters()
-    #print("Params to learn:")
-    if feature_extract:
-        params_to_update = []
-        for name,param in model_ft.named_parameters():
-            if param.requires_grad == True:
-                params_to_update.append(param)
-                #print("\t",name)
-    #else:
-    #    for name,param in model_ft.named_parameters():
-    #        if param.requires_grad == True:
-    #            #print("\t",name)
-    
-    return model_ft, params_to_update
+    return model_ft, input_size, params_to_update
         
 def plot_parameter_search(params, accs, ):
     # TODO
@@ -261,15 +242,14 @@ def plot(train, val, mode, used_lr):
 
 
 
-def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_update, dataloaders_dictest):
+def parameter_search(dataloader_dict, params_to_update, test_data):
  
         ## COARSE SEARCH
         print(coarse_lr)
-        #np.arange(1e-5, 1e-4, 1e-5)
-        print(coarse_lr.shape)
+
         coarse_val_accuracies = []
         for lr in coarse_lr:
-            model_ft, params_to_update = initialize_training()
+            model_ft, _, params_to_update = initialize_model(model_name, num_classes)
             # Train model with lr
             optimizer_ft = optim.Adam(params_to_update, lr=lr)
             # Setup the loss fxn
@@ -277,7 +257,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
             # Train and evaluate
             model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
             coarse_val_accuracies.append( hist[-1] )
-            print(test_model(model_ft, dataloaders_dictest)[-1])
+            print(test_model(model_ft, test_data)[-1])
 
         # writes coarse results to txt file
         f = open("bin_plots/coarse.txt", "a")
@@ -288,42 +268,10 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
         f.close()
 
         plot_parameter_search(coarse_lr, coarse_val_accuracies )
+        best_found = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-1:])[0]
 
-        return (0,0)
-
-        ### FINE RANDOM SEARCH
-        best_3_lr = np.take(coarse_lr, np.argsort(coarse_val_accuracies)[-3:])
-
-        l_min, l_max = min(best_3_lr), max(best_3_lr)
-        accs = []
-        etas = []
-        for _ in range(iter):
-            lr = l_min + (l_max - l_min) * random.uniform(0,1)
-            etas.append(lr)
-            model_ft, params_to_update = initialize_training()
-            # Train model with lr
-            optimizer_ft = optim.Adam(params_to_update, lr=lr)
-            # Setup the loss fxn
-            criterion = nn.CrossEntropyLoss()
-            # Train and evaluate
-            model_ft, train_hist, hist, _, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-            accs.append( hist[-1] )
-
-        # writes fine search results to txt file
-        f = open("bin_plots/fine.txt", "a")
-        f.write('\n')
-        for idx, val in enumerate(accs):
-            f.write(str(etas[idx])+ ", " + str(val.item()*100)+ "%\n" )
-            print("(", etas[idx], ",",val.item()*100, "% )" )
-        f.close()
-
-        best_3_lr = np.take(etas, np.argsort(accs)[-3:])
-        print("The 3 best lr values:", best_3_lr, "and their respective accuracies on validation dataset",np.take(accs, np.argsort(accs)[-3:]))
-
-        plot_parameter_search(etas, accs)
-
-        best_found = (np.take(etas, np.argsort(accs)[-1:])[0] , np.take(accs, np.argsort(accs)[-1:])[0])
         return best_found
+
 
 def pre_process_dataset(input_size, subset = None):
     files = ['./data/oxford-iiit-pet/annotations/test.txt', './data/oxford-iiit-pet/annotations/trainval.txt']
@@ -377,31 +325,28 @@ def download_data():
 
 
 def main():
-    # Load pretrained dataset
-    model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
-    model_ft = model_ft.to(device)
+
+    # Load pretrained model
+    model_ft, input_size, _ = initialize_model(model_name, num_classes, use_pretrained=True)
+    #model_ft = model_ft.to(device)
     #download_data()
 
     # Sets parameters to update and print them out
     params_to_update = model_ft.parameters()
     print("Params to learn:")
-    if feature_extract:
-        params_to_update = []
-        for name,param in model_ft.named_parameters():
+    params_to_update = []
+    for name,param in model_ft.named_parameters():
+        if param.requires_grad == True:
+            params_to_update.append(param)
+            print("\t",name)
 
-            if param.requires_grad == True:
-                params_to_update.append(param)
-                print("\t",name)
-    else:
-        for name,param in model_ft.named_parameters():
-            if param.requires_grad == True:
-                print("\t",name)
+
 
     # Change labels of data to be binary for specie classification
-    dataloaders_dict, dataloaders_dictest = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
+    trainval_data, test_data = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     ### Learning rate search:
-    best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update, dataloaders_dictest)
+    best_lr = parameter_search(trainval_data, params_to_update, test_data)
     print("best_lr", best_lr)
     used_lr = best_lr[0]
     #used_lr = 2.39671411e-05
@@ -414,18 +359,21 @@ def main():
     criterion = nn.CrossEntropyLoss()
 
     # Train and evaluate
-    model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+    model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
     plot(train_loss_hist, val_loss_hist, "loss", used_lr)
     
     # Eval model on test data
-    test_hist = test_model(model_ft, dataloaders_dictest)
+    test_hist = test_model(model_ft, test_data)
     print(test_hist)
 
 
+
+
+    """ BASELINE """
     ## Calculate baseline for comparison
     # Initialize the non-pretrained version of the model used for this run
     """
-    scratch_model,_ = initialize_model(model_name, num_classes, feature_extract=False, use_pretrained=False)
+    scratch_model,_ = initialize_model(model_name, num_classes, use_pretrained=False)
     scratch_model = scratch_model.to(device)
     scratch_optimizer = optim.SGD(scratch_model.parameters(), lr=0.001, momentum=0.9)
     scratch_criterion = nn.CrossEntropyLoss()
@@ -442,8 +390,6 @@ def main():
     #ohist = [h.cpu().numpy() for h in hist]
     #shist = [h.cpu().numpy() for h in test_hist]
 
-
-    
     return 0
 
 
@@ -458,7 +404,6 @@ with open('data/oxford-iiit-pet/annotations/list.txt') as f:
     for _, line in enumerate(lines[6:],6):
         tokens = line.split(' ')
         id_to_specie[str(int(tokens[1])-1)] = int(tokens[2])-1
-
 # Convert Class id to specie ID in train and val datasets
 for idx, lab in enumerate(train_labels):
     train_labels[idx]=(id_to_specie[str(lab.item())])
