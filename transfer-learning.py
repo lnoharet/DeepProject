@@ -18,10 +18,14 @@ import copy
 from glob import glob
 from PIL import Image
 
+""" Runnning Options """
+PARAM_SEARCH = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None
+
+""" SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 coarse_lr = np.array([0.0009, 0.0095, 0.001, 0.0015, 0.002])
@@ -33,6 +37,7 @@ l_min = 0.000027
 #    lr = l_min + (l_max-l_min)*random.uniform(0,1)
 #    coarse_lr.append(lr)
 #coarse_lr = np.array(coarse_lr)
+
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
@@ -206,7 +211,7 @@ def initialize_model(model_name, num_classes, use_pretrained=True):
         model_ft = models.resnet34(pretrained=use_pretrained)
 
     freeze_all_params(model_ft)
-    
+
     """ Set layers to be fine-tuned """
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
@@ -216,6 +221,8 @@ def initialize_model(model_name, num_classes, use_pretrained=True):
     for name,param in model_ft.named_parameters():
         if param.requires_grad == True:
             params_to_update.append(param)
+    
+    model_ft = model_ft.to(device)
 
     return model_ft, input_size, params_to_update
         
@@ -327,32 +334,28 @@ def download_data():
 def main():
 
     # Load pretrained model
-    model_ft, input_size, _ = initialize_model(model_name, num_classes, use_pretrained=True)
-    #model_ft = model_ft.to(device)
+    model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, use_pretrained=True)
+    
     #download_data()
 
-    # Sets parameters to update and print them out
-    params_to_update = model_ft.parameters()
+    # Print the params we fine-tune
     print("Params to learn:")
-    params_to_update = []
     for name,param in model_ft.named_parameters():
         if param.requires_grad == True:
-            params_to_update.append(param)
             print("\t",name)
-
 
 
     # Change labels of data to be binary for specie classification
     trainval_data, test_data = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
-    ### Learning rate search:
-    best_lr = parameter_search(trainval_data, params_to_update, test_data)
-    print("best_lr", best_lr)
-    used_lr = best_lr[0]
-    #used_lr = 2.39671411e-05
+    if PARAM_SEARCH:
+        ### Learning rate search:
+        best_lr = parameter_search(trainval_data, params_to_update, test_data)
+        print("best_lr", best_lr)
+        used_lr = best_lr[0]
+    else:
+        used_lr = 2.39671411e-05
 
-    ## SGD
-    #optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
     optimizer_ft = optim.Adam(params_to_update, lr=used_lr)
     # Setup the loss fxn
@@ -365,6 +368,10 @@ def main():
     # Eval model on test data
     test_hist = test_model(model_ft, test_data)
     print(test_hist)
+
+
+
+
 
 
 
