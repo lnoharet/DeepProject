@@ -23,7 +23,7 @@ PARAM_SEARCH = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10#None # None = whole dataset
+DATA_SUBSET = None # None = whole dataset
 
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
