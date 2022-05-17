@@ -43,7 +43,7 @@ batch_size = 8
 num_epochs = 15
 
 # Flag for feature extracting. 
-feature_extract = False
+feature_extract = True
 
 
 class CustomDataset(Dataset):
