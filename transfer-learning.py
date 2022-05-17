@@ -18,6 +18,8 @@ import copy
 from glob import glob
 from PIL import Image
 
+torch.manual_seed(1337)
+
 """ Runnning Options """
 PARAM_SEARCH = False
 
@@ -25,6 +27,7 @@ PARAM_SEARCH = False
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
 default_lr = 0.001
+
 
 """ SEARCH PARAMS """
 #coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
