@@ -25,7 +25,7 @@ PARAM_SEARCH = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10 # None = whole dataset
+DATA_SUBSET = None # None = whole dataset
 default_lr = 0.001
 
 
@@ -49,7 +49,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 8
+batch_size = 16
 num_epochs = 10
 
 class CustomDataset(Dataset):
