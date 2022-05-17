@@ -25,7 +25,7 @@ PARAM_SEARCH = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10 # None = whole dataset
+DATA_SUBSET = None # None = whole dataset
 default_lr = 0.001
 
 
