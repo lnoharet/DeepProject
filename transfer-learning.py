@@ -402,7 +402,7 @@ def main():
     ### Learning rate search:
     best_lr = parameter_coarse_to_fine_search(20, model_ft, dataloaders_dict, params_to_update, dataloaders_dictest)
     print("best_lr", best_lr)
-    used_lr = best_lr
+    used_lr = best_lr[0]
     #used_lr = 2.39671411e-05
 
     ## SGD
