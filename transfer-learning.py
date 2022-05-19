@@ -18,7 +18,10 @@ import copy
 from glob import glob
 from PIL import Image
 
-torch.manual_seed(1337)
+seed_ = 0.444
+torch.manual_seed(seed_)
+torch.cuda.manual_seed_all(seed_)
+torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = True
@@ -30,7 +33,7 @@ default_lr = 0.001
 
 
 """ SEARCH PARAMS """
-coarse_lr = np.array([0.000009, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+coarse_lr = np.array([0.00115])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
 
