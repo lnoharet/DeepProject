@@ -32,6 +32,9 @@ DATA_SUBSET = None # None = whole dataset
 default_lr = 0.001
 
 
+lr_4 = 0.001
+lr_fc = 0.01
+
 """ SEARCH PARAMS """
 coarse_lr = np.array([0.00115])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
@@ -233,8 +236,8 @@ def initialize_model(model_name, num_classes, use_pretrained=True):
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
-    params_to_update = [{"params": model_ft.layer4.parameters(), "lr":1e-5},
-                        {"params": model_ft.fc.parameters(), "num_classes":37}]
+    params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lr_4},
+                        {"params": model_ft.fc.parameters(), "lr":lr_fc}]
 
     model_ft = model_ft.to(device)
     params_to_list = ["fc.weight", "fc.bias"]
@@ -392,7 +395,7 @@ def main():
         used_lr = default_lr
 
         ## Adam
-        optimizer_ft = optim.Adam(params_to_update, lr=used_lr)
+        optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
