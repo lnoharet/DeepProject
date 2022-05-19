@@ -94,9 +94,11 @@ def load_image(filename) :
     img = img.convert('RGB')
     return img
 
-def freeze_all_params(model):
-    for param in model.parameters():
-        param.requires_grad = False
+def freeze_all_params(model, params_list):
+    for name,param in model.named_parameters():
+        if name not in params_list:
+            param.requires_grad = False
+ 
 
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False, used_lr = None):
@@ -225,19 +227,28 @@ def initialize_model(model_name, num_classes, use_pretrained=True):
         model_ft = models.resnet34(pretrained=use_pretrained)
 
 
-    freeze_all_params(model_ft)
+    
 
     """ Set layers to be fine-tuned """
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
+    params_to_update = [{"params": model_ft.layer4.parameters(), "lr":1e-5},
+                        {"params": model_ft.fc.parameters(), "num_classes":37}]
 
-    params_to_update = []
-    for name,param in model_ft.named_parameters():
-        if param.requires_grad == True:
-            params_to_update.append(param)
-    
     model_ft = model_ft.to(device)
+    params_to_list = ["fc.weight", "fc.bias"]
+    for name,param in model_ft.named_parameters():
+        if "layer4" in name:
+            params_to_list.append(name)
+    freeze_all_params(model_ft, params_to_list)
+
+    #params_to_update = []
+    #for name,param in model_ft.named_parameters():
+    #    if param.requires_grad == True:
+    #        params_to_update.append(param)
+    
+    
 
     return model_ft, input_size, params_to_update
         
@@ -359,7 +370,7 @@ def main():
 
     # Load pretrained model
     model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, use_pretrained=True)
-    print(model_ft)
+    #print(model_ft)
     #downl oad_data()
 
     # Print the params we fine-tune
