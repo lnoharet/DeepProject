@@ -211,6 +211,7 @@ def test_model(model, dataloaders):
         running_corrects += torch.sum(preds == labels.data)
 
         acc_history.append(running_corrects/len(dataloaders['test'].dataset))
+    print(acc_history)
     return acc_history
 
 
@@ -404,7 +405,13 @@ def main():
         # Test the pretrained model on data set without fine tuning
         print('--- Testing baseline model (no fine-tuning) on testdata ---')
         base_model = models.resnet18(pretrained=True)
+        num_ftrs = base_model.fc.in_features
+        base_model.fc = nn.Linear(num_ftrs, num_classes)
+        freeze_all_params(base_model)
         base_model = base_model.to(device)
+        #optimizer_ft = optim.Adam(lr = 0)
+        #criterion = nn.CrossEntropyLoss()
+        #base_model, _, _, _, _ = train_model(base_model, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs)
 
         base_test_acc = test_model(base_model, test_data)[-1].item()*100
         print("Test Acc = ", base_test_acc)
@@ -454,5 +461,7 @@ for idx, lab in enumerate(train_labels):
 for idx, lab in enumerate(val_labels):
     val_labels[idx]=(id_to_specie[str(lab.item())])
 """
+
+
 
 
