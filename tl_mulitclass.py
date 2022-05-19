@@ -21,7 +21,7 @@ from PIL import Image
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 1840
+DATA_SUBSET = None
 
 # Models from [resnet18, resnet34]
 model_name = "resnet18"
@@ -253,6 +253,7 @@ def parameter_coarse_to_fine_search(iter, model, dataloader_dict, params_to_upda
  
         ## COARSE SEARCH
         coarse_lr = np.array([0.00001,0.00003,0.00005,0.00007,0.00009, 0.0001, 0.0003, 0.0005, 0.0007, 0.0009])#np.arange(1e-5, 1e-4, 1e-5)
+        
         print(coarse_lr.shape)
         coarse_val_accuracies = []
         for lr in coarse_lr:
@@ -393,7 +394,7 @@ def main():
     ## SGD
     #optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
     ## Adam
-    used_lr = 0.0001
+    used_lr = 2.39671411e-05
     optimizer_ft = optim.Adam(params_to_update, lr = used_lr)
 
     # Setup the loss fxn
