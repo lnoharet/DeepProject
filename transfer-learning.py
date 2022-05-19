@@ -64,7 +64,9 @@ class CustomDataset(Dataset):
         if split == 'trainval':
             self.transform = transforms.Compose([
                 # TODO: kolla om det är rätt transforms
-                transforms.RandomResizedCrop(input_size),
+                #transforms.RandomResizedCrop(input_size),
+                transforms.Resize(input_size),
+                transforms.CenterCrop(input_size),
                 #transforms.RandomHorizontalFlip(),
                 #transforms.Resize(input_size),
                 transforms.ToTensor(),
