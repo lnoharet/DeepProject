@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 from cgi import test
+from email.mime import base
 import random
 
 import torch
@@ -25,11 +26,13 @@ torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
+TRAINING     = False
+BASELINE     = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-default_lr = 0.005
+
 
 """ SEARCH PARAMS """
 coarse_lr = np.array([0.00115])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
@@ -53,6 +56,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_classes = 2
 batch_size = 8
 num_epochs = 15
+default_lr = 0.001
+
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
@@ -63,9 +68,9 @@ class CustomDataset(Dataset):
         if split == 'trainval':
             self.transform = transforms.Compose([
                 # TODO: kolla om det är rätt transforms
-                transforms.RandomResizedCrop(input_size),
-                #transforms.Resize(input_size),
-                #transforms.CenterCrop(input_size),
+                #transforms.RandomResizedCrop(input_size),
+                transforms.Resize(input_size),
+                transforms.CenterCrop(input_size),
                 #transforms.RandomHorizontalFlip(),
                 #transforms.Resize(input_size),
                 transforms.ToTensor(),
@@ -375,7 +380,7 @@ def main():
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
         print("Parameter search yielded best lr =", best_lr[0])
         used_lr = best_lr[0]
-    else:
+    elif TRAINING:
         used_lr = default_lr
 
         ## Adam
@@ -395,8 +400,14 @@ def main():
 
         plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
         plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
+    elif BASELINE:
+        # Test the pretrained model on data set without fine tuning
+        print('--- Testing baseline model (no fine-tuning) on testdata ---')
+        base_model = models.resnet18(pretrained=True)
+        base_model = base_model.to(device)
 
-
+        base_test_acc = test_model(base_model, test_data)[-1].item()*100
+        print("Test Acc = ", base_test_acc)
 
 
 
@@ -443,3 +454,5 @@ for idx, lab in enumerate(train_labels):
 for idx, lab in enumerate(val_labels):
     val_labels[idx]=(id_to_specie[str(lab.item())])
 """
+
+
