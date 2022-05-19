@@ -256,7 +256,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.legend()
     if mode == "loss":  plt.ylim([0, 1])
     else:               plt.ylim([0.5, 1])
-    plt.savefig('bin_plots/' + mode + str(round(time.time()) - 1600000000) + '.png')
+    plt.savefig('bin_plots/' + mode + str(round(time.time()) - 1650000000) + '.png')
     plt.close()
     return
 
