@@ -98,6 +98,7 @@ def freeze_all_params(model):
     for param in model.parameters():
         param.requires_grad = False
 
+
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False, used_lr = None):
     since = time.time()
 
@@ -259,7 +260,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.legend()
     if mode == "loss":  plt.ylim([0, 1])
     else:               plt.ylim([0.5, 1])
-    plt.savefig('bin_plots/' + mode + str(round(time.time()) - 1650000000) + '.png')
+    plt.savefig('mul_plots/' + mode + str(round(time.time()) - 1650000000) + '.png')
     plt.close()
     return
 
@@ -292,7 +293,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             
 
         # writes coarse results to txt file
-        f = open("bin_plots/coarse.txt", "a")
+        f = open("mul_plots/coarse.txt", "a")
         f.write('\n')
         for idx, val in enumerate(val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
