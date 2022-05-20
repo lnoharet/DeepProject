@@ -394,17 +394,6 @@ def main():
         used_lr = best_lr[0]
     else:
         used_lr = default_lr
-<<<<<<< HEAD
-=======
-        # Load pretrained model
-        model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, used_lr, use_pretrained=True)
-         # Print the params we fine-tune
-        print("Params to learn:")
-        for name,param in model_ft.named_parameters():
-            if param.requires_grad == True:
-                print("\t",name)
->>>>>>> 670c5a0f52e9d09a2873e98ec254cecb66bdada4
-
         ## Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
         # Setup the loss fxn
