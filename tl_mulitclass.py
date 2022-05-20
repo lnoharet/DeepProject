@@ -103,8 +103,6 @@ def freeze_all_params(model, params_list):
         if name not in params_list:
             param.requires_grad = False
  
-
-
 def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_epochs=25, is_inception=False, used_lr = None):
     since = time.time()
 
