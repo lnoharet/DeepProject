@@ -32,7 +32,7 @@ BASELINE     = True
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-
+default_lr = 0.005
 
 """ SEARCH PARAMS """
 coarse_lr = np.array([0.00115])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
@@ -68,9 +68,9 @@ class CustomDataset(Dataset):
         if split == 'trainval':
             self.transform = transforms.Compose([
                 # TODO: kolla om det är rätt transforms
-                #transforms.RandomResizedCrop(input_size),
-                transforms.Resize(input_size),
-                transforms.CenterCrop(input_size),
+                transforms.RandomResizedCrop(input_size),
+                #transforms.Resize(input_size),
+                #transforms.CenterCrop(input_size),
                 #transforms.RandomHorizontalFlip(),
                 #transforms.Resize(input_size),
                 transforms.ToTensor(),
