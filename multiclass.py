@@ -17,19 +17,26 @@ import copy
 from glob import glob
 from PIL import Image
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 seed_ = 0.444
 torch.manual_seed(seed_)
 torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
+data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
+DATA_SUBSET = 10                                  # None = whole dataset
+
 """ Runnning options """
 PARAM_SEARCH = False
 
-data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
-DATA_SUBSET = None                                  # None = whole dataset
-
+""" Network params """
+model_name = "resnet18"                              # Models from [resnet18, resnet34]
+num_classes = 37
+batch_size = 8
+num_epochs = 15
 default_lr = 0.001
-
+# Learning rates per layer
 lr_4 = 0.001
 #lr_fc = 0.01
 
@@ -45,14 +52,6 @@ l_min = 0.000027
 #    lr = l_min + (l_max-l_min)*random.uniform(0,1)
 #    coarse_lr.append(lr)
 #coarse_lr = np.array(coarse_lr)
-
-''' Network params '''
-model_name = "resnet18"                              # Models from [resnet18, resnet34]
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-num_classes = 37
-batch_size = 8
-num_epochs = 15
 
 
 class CustomDataset(Dataset):
@@ -90,13 +89,13 @@ class CustomDataset(Dataset):
 
 
 def load_image(filename):
-    img = Image.open(filename)
-    img = img.convert('RGB')
-    return img
+    image = Image.open(filename)
+    image = image.convert('RGB')
+    return image
 
 
 def freeze_all_params(model, params_list):
-    for name,param in model.named_parameters():
+    for name, param in model.named_parameters():
         if name not in params_list:
             param.requires_grad = False
 
@@ -165,6 +164,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler = None, num_
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
+                        lrs.append(optimizer.param_groups[0]["lr"]) # track learning rate
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
@@ -197,7 +197,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler = None, num_
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model, train_acc_history, val_acc_history, train_loss_history, val_loss_history
+    return model, train_acc_history, val_acc_history, train_loss_history, val_loss_history, lrs
 
 
 def test_model(model, dataloaders):
@@ -255,6 +255,16 @@ def plot_parameter_search(params, accs, ):
     #plt.ylabel('val accuracy')
     #plt.savefig('bin_plots/coarse_seach' + str(round(time.time())) +'.png')
     #plt.close()
+    return
+
+
+def plot_lrs(lrs):
+    plt.plot(lrs)
+    plt.xlabel('epoch')
+    plt.ylabel('learning rate')
+    plt.title('Learning rate throughout training')
+    plt.savefig('mul_plots/' + 'eta' + str(round(time.time()) - 1650000000) + '.png')
+    plt.close()
     return
 
 
@@ -385,7 +395,7 @@ def main():
 
         # Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
-        # Learning rate scheduler
+        # Learning rate scheduler, set to None to use used_lr
         scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
@@ -393,13 +403,14 @@ def main():
         # Train and evaluate
         print('--- Training with adam ---')
         #model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-        model_ft, train_acc_hist, val_acc_hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+        model_ft, train_acc_hist, val_acc_hist, train_loss_hist, val_loss_hist, lrs = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
 
         # Eval model on test data
         print('--- Testing model on testdata ---')
         test_acc = test_model(model_ft, test_data)[-1].item()*100
         print("Test Acc = ", test_acc)
 
+        plot_lrs(lrs)
         plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
         plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
