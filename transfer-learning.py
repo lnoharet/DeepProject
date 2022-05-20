@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 from cgi import test
+from email.mime import base
 import random
 
 import torch
@@ -24,12 +25,13 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
-PARAM_SEARCH = True
+PARAM_SEARCH = False
+TRAINING     = False
+BASELINE     = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-default_lr = 0.001
 
 
 """ SEARCH PARAMS """
@@ -54,6 +56,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_classes = 2
 batch_size = 8
 num_epochs = 15
+default_lr = 0.001
+
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
@@ -207,6 +211,7 @@ def test_model(model, dataloaders):
         running_corrects += torch.sum(preds == labels.data)
 
         acc_history.append(running_corrects/len(dataloaders['test'].dataset))
+    print(acc_history)
     return acc_history
 
 
@@ -376,7 +381,7 @@ def main():
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
         print("Parameter search yielded best lr =", best_lr[0])
         used_lr = best_lr[0]
-    else:
+    elif TRAINING:
         used_lr = default_lr
 
         ## Adam
@@ -396,8 +401,20 @@ def main():
 
         plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
         plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
+    elif BASELINE:
+        # Test the pretrained model on data set without fine tuning
+        print('--- Testing baseline model (no fine-tuning) on testdata ---')
+        base_model = models.resnet18(pretrained=True)
+        num_ftrs = base_model.fc.in_features
+        base_model.fc = nn.Linear(num_ftrs, num_classes)
+        freeze_all_params(base_model)
+        base_model = base_model.to(device)
+        #optimizer_ft = optim.Adam(lr = 0)
+        #criterion = nn.CrossEntropyLoss()
+        #base_model, _, _, _, _ = train_model(base_model, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs)
 
-
+        base_test_acc = test_model(base_model, test_data)[-1].item()*100
+        print("Test Acc = ", base_test_acc)
 
 
 
@@ -444,3 +461,5 @@ for idx, lab in enumerate(train_labels):
 for idx, lab in enumerate(val_labels):
     val_labels[idx]=(id_to_specie[str(lab.item())])
 """
+
+
