@@ -277,8 +277,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.ylabel(mode)
     plt.title(mode + ' with lr=' + str(used_lr) + ' n_batch=' + str(batch_size) + ' test_acc=' + str(test_acc))
     plt.legend()
-    if mode == "loss":  plt.ylim([0, 1])
-    else:               plt.ylim([0.5, 1])
+    if mode == "acc":  plt.ylim([0, 1])
     plt.savefig('mul_plots/' + mode + str(round(time.time()) - 1650000000) + '.png')
     plt.close()
     return
@@ -402,7 +401,7 @@ def main():
 
         ## Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.1, verbose= True)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.01, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
