@@ -331,12 +331,12 @@ def pre_process_dataset(input_size, subset = None):
             lines = f.readlines()
             if subset:
                 for line in np.random.permutation(lines)[:subset]:
-                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    label = int(line.split(" ")[1]) - 1   
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
             else:
                 for line in lines:
-                    label = 0 if line.split(" ")[0][0].isupper() else 1  
+                    label = int(line.split(" ")[1]) - 1  
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
 
