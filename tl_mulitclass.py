@@ -24,11 +24,11 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
-PARAM_SEARCH = True
+PARAM_SEARCH = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = 10#None # None = whole dataset
+DATA_SUBSET = None # None = whole dataset
 default_lr = 0.001
 
 
@@ -105,7 +105,7 @@ def freeze_all_params(model, params_list):
  
 
 
-def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False, used_lr = None):
+def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_epochs=25, is_inception=False, used_lr = None):
     since = time.time()
 
     val_acc_history = []
@@ -135,9 +135,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
             running_corrects = 0
 
             # Iterate over data.
-            count = 0
             for inputs, labels in dataloaders[phase]:
-                count+=1
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
@@ -167,6 +165,9 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
+                        if scheduler:
+                            scheduler.step()
+
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
@@ -398,12 +399,14 @@ def main():
 
         ## Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
+        #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
         # Train and evaluate
         print('--- Training with adam ---')
-        model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+        model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
 
 
         # Eval model on test data
