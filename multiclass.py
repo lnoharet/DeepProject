@@ -179,7 +179,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler = None, num_
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
-            if scheduler and phase == 'train':
+            if scheduler and phase == 'val':
                 scheduler.step()
 
             # deep copy the model
