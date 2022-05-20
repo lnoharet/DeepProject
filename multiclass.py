@@ -25,10 +25,10 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
-DATA_SUBSET = 10                                  # None = whole dataset
+DATA_SUBSET = None                                  # None = whole dataset
 
 """ Runnning options """
-PARAM_SEARCH = False
+PARAM_SEARCH = True
 
 """ Network params """
 model_name = "resnet18"                              # Models from [resnet18, resnet34]
@@ -295,7 +295,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
-            model_ft, train_hist, hist, train_loss, val_loss = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
+            model_ft, train_hist, hist, train_loss, val_loss, _ = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
 
             test_acc = test_model(model_ft, test_data)[-1].item()*100
 
@@ -402,7 +402,6 @@ def main():
 
         # Train and evaluate
         print('--- Training with adam ---')
-        #model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
         model_ft, train_acc_hist, val_acc_hist, train_loss_hist, val_loss_hist, lrs = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
 
         # Eval model on test data
