@@ -329,12 +329,13 @@ def pre_process_dataset(input_size, subset = None):
         with open(files[i]) as f:
             lines = f.readlines()
             if subset:
-                    label = int(line.split(" ")[1]) - 1  
+                for line in np.random.permutation(lines)[:subset]:
+                    label = 0 if line.split(" ")[0][0].isupper() else 1  
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
             else:
                 for line in lines:
-                    label = int(line.split(" ")[1]) - 1  
+                    label = 0 if line.split(" ")[0][0].isupper() else 1  
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
 
@@ -394,6 +395,7 @@ def main():
         used_lr = best_lr[0]
     else:
         used_lr = default_lr
+
         ## Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
         # Setup the loss fxn
