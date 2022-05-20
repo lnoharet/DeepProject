@@ -2,7 +2,6 @@ from __future__ import print_function
 from __future__ import division
 from cgi import test
 import random
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -23,20 +22,18 @@ torch.manual_seed(seed_)
 torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
-""" Runnning Options """
+""" Runnning options """
 PARAM_SEARCH = False
 
-# Top level data directory.
-data_dir = "./data/oxford-iiit-pet"
-DATA_SUBSET = None#None # None = whole dataset
-default_lr = 0.001
+data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
+DATA_SUBSET = None                                  # None = whole dataset
 
+default_lr = 0.001
 
 lr_4 = 0.001
 #lr_fc = 0.01
 
-""" SEARCH PARAMS """
-
+""" Search params """
 coarse_lr = np.array([0.09, 0.01, 0.009, 0.005, 0.001, 0.0005, 0.0001, 0.000005])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
@@ -49,19 +46,17 @@ l_min = 0.000027
 #    coarse_lr.append(lr)
 #coarse_lr = np.array(coarse_lr)
 
-
-# Models from [resnet18, resnet34]
-model_name = "resnet18"
+''' Network params '''
+model_name = "resnet18"                              # Models from [resnet18, resnet34]
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# Parameters
 num_classes = 37
 batch_size = 8
 num_epochs = 15
 
+
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
-
         self.img_labels = labels
         self.img_paths = img_paths
 
@@ -93,16 +88,17 @@ class CustomDataset(Dataset):
         image = self.transform(image)
         return image, label
 
-def load_image(filename) :
+
+def load_image(filename):
     img = Image.open(filename)
     img = img.convert('RGB')
     return img
+
 
 def freeze_all_params(model, params_list):
     for name,param in model.named_parameters():
         if name not in params_list:
             param.requires_grad = False
-
 
 
 def train_model(model, dataloaders, criterion, optimizer, scheduler = None, num_epochs=25, is_inception=False, used_lr = None):
@@ -199,8 +195,6 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler = None, num_
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
     print('Best val Acc: {:4f}'.format(best_acc))
 
-
-
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model, train_acc_history, val_acc_history, train_loss_history, val_loss_history
@@ -224,25 +218,19 @@ def test_model(model, dataloaders):
 
 
 def initialize_model(model_name, num_classes, lr, use_pretrained=True):
-    # Initialize these variables which will be set in this if statement. Each of these
-    #   variables is model specific.
+    """ Initialize these variables which will be set in this if statement.
+        Each of these variables is model specific."""
     model_ft = None
     input_size = 0
 
-    if model_name == "resnet18":
-        """ Resnet18 """
-        model_ft = models.resnet18(pretrained=use_pretrained)
-    elif model_name == "resnet34":
-        """ Resnet34 """
-        model_ft = models.resnet34(pretrained=use_pretrained)
+    if model_name == "resnet18":    model_ft = models.resnet18(pretrained=use_pretrained)
+    elif model_name == "resnet34":  model_ft = models.resnet34(pretrained=use_pretrained)
 
-
-    """ Set layers to be fine-tuned """
+    # Set layers to be fine-tuned
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
     params_to_update = [{"params": model_ft.fc.parameters(), "lr": lr}]#{"params": model_ft.layer4.parameters(), "lr":lr_4},
-
 
     model_ft = model_ft.to(device)
     params_to_list = ["fc.weight", "fc.bias"]
@@ -256,9 +244,8 @@ def initialize_model(model_name, num_classes, lr, use_pretrained=True):
     #    if param.requires_grad == True:
     #        params_to_update.append(param)
 
-
-
     return model_ft, input_size, params_to_update
+
 
 def plot_parameter_search(params, accs, ):
     # TODO
@@ -269,6 +256,7 @@ def plot_parameter_search(params, accs, ):
     #plt.savefig('bin_plots/coarse_seach' + str(round(time.time())) +'.png')
     #plt.close()
     return
+
 
 def plot(train, val, mode, used_lr, test_acc):
     plt.plot(val, label='val')
@@ -283,15 +271,12 @@ def plot(train, val, mode, used_lr, test_acc):
     return
 
 
-
 def parameter_search(dataloader_dict, params_to_update, test_data):
-
         ## COARSE SEARCH
         print('--- PARAMETER SEARCH ---')
         print('Searched parameters:', coarse_lr)
 
         val_accuracies = []
-
 
         for lr in coarse_lr:
             model_ft, _, params_to_update = initialize_model(model_name, num_classes, lr)
@@ -308,7 +293,6 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             plot(train_hist, hist, 'acc', lr, test_acc)
 
             val_accuracies.append( hist[-1] )
-
 
         # writes coarse results to txt file
         f = open("mul_plots/coarse.txt", "a")
@@ -328,6 +312,7 @@ def pre_process_dataset(input_size, subset = None):
     files = ['./data/oxford-iiit-pet/annotations/test.txt', './data/oxford-iiit-pet/annotations/trainval.txt']
     data = [[] for i in range(len(files))]
     labels = [[] for i in range(len(files))]
+
     for i in range(len(files)):
         with open(files[i]) as f:
             lines = f.readlines()
@@ -335,13 +320,12 @@ def pre_process_dataset(input_size, subset = None):
                 for line in np.random.permutation(lines)[:subset]:
                     label = int(line.split(" ")[1]) - 1
                     labels[i].append(label)
-                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+                    data[i].append('./data/oxford-iiit-pet/images/' + str(line.split(" ")[0]))
             else:
                 for line in lines:
                     label = int(line.split(" ")[1]) - 1
                     labels[i].append(label)
-                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
-
+                    data[i].append('./data/oxford-iiit-pet/images/' + str(line.split(" ")[0]))
 
     trainingval_data = CustomDataset(
         split = 'trainval',
@@ -355,9 +339,9 @@ def pre_process_dataset(input_size, subset = None):
         labels=labels[0],
         input_size = input_size
     )
+
     # Load training and validation datasets
     train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.8),int(len(trainingval_data)*0.2 ) ])
-
 
     # Create training and validation dataloaders
     dataloaders_dict = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0),
@@ -367,60 +351,57 @@ def pre_process_dataset(input_size, subset = None):
 
     return dataloaders_dict, dataloaders_dictest
 
+
 def download_data():
     trainingval_data = torchvision.datasets.OxfordIIITPet(
-    root = "data",
-    download = True
+        root = "data",
+        download = True
     )
 
 
 def main():
-
     # Load pretrained model
+    print("Initializing model")
     model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
     #print(model_ft)
-    #downl oad_data()
 
-    # Print the params we fine-tune
+    # Print the params to fine-tune
     print("Params to learn:")
     for name,param in model_ft.named_parameters():
         if param.requires_grad == True:
             print("\t",name)
 
-
-    # Change labels of data to be binary for specie classification
+    # Setup dataloaders
+    #download_data()
     trainval_data, test_data = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
 
     if PARAM_SEARCH:
-        ### Learning rate search:
+        # Learning rate search
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
         print("Parameter search yielded best lr =", best_lr[0])
         used_lr = best_lr[0]
     else:
         used_lr = default_lr
 
-        ## Adam
+        # Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
+        # Learning rate scheduler
         scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
         # Train and evaluate
         print('--- Training with adam ---')
-        model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
-
+        #model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+        model_ft, train_acc_hist, val_acc_hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
 
         # Eval model on test data
         print('--- Testing model on testdata ---')
         test_acc = test_model(model_ft, test_data)[-1].item()*100
         print("Test Acc = ", test_acc)
 
-        plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
-        plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
-
-
-
-
+        plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
+        plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
 
 
@@ -434,16 +415,6 @@ def main():
     scratch_criterion = nn.CrossEntropyLoss()
     _,scratch_hist = train_model(scratch_model, dataloaders_dict, scratch_criterion, scratch_optimizer, num_epochs=num_epochs, is_inception=(model_name=="inception"))
     """
-
-
-    # Plot the training curves of validation accuracy vs. number
-    #  of training epochs for the transfer learning method and
-    #  the model trained from scratch
-    ohist = []
-    shist = []
-
-    #ohist = [h.cpu().numpy() for h in hist]
-    #shist = [h.cpu().numpy() for h in test_hist]
 
     return 0
 
