@@ -401,7 +401,7 @@ def main():
 
         ## Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.01, verbose= True)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
