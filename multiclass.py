@@ -383,7 +383,7 @@ def main():
     else:
         used_lr = default_lr
         # Load pretrained model
-        model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, used_lr use_pretrained=True)
+        model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, used_lr, use_pretrained=True)
          # Print the params we fine-tune
         print("Params to learn:")
         for name,param in model_ft.named_parameters():
