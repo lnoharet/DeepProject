@@ -28,7 +28,7 @@ data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
 DATA_SUBSET = 10#None                                  # None = whole dataset
 
 """ Runnning options """
-PARAM_SEARCH = True
+PARAM_SEARCH = False#True
 
 """ Network params """
 model_name = "resnet18"                              # Models from [resnet18, resnet34]
@@ -370,11 +370,13 @@ def download_data():
 
 
 def main():
-    #model_ft = torch.load("/model.pt")
-    #model_ft.eval()
+    model_ft = torch.load("/model.pt")
+    model_ft.eval()
     # Load pretrained model
     print("Initializing model")
-    model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
+    input_size = 224
+    params_to_update = [{"params": model_ft.fc.parameters(), "lr": lr}]
+    #model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
     #print(model_ft)
 
     # Print the params to fine-tune
@@ -398,7 +400,7 @@ def main():
         # Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
         # Learning rate scheduler, set to None to use used_lr
-        #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
+        scheduler = None #torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
@@ -415,8 +417,8 @@ def main():
         #plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
         #plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
-    torch.save(model_ft, "model.pt")
-    print("saved")
+    #torch.save(model_ft, "model.pt")
+    #print("saved")
 
     """ BASELINE """
     ## Calculate baseline for comparison
