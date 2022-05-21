@@ -29,7 +29,7 @@ PARAM_SEARCH = False
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-default_lr = 0.0001
+default_lr = 0.0004
 
 
 lr_4 = 0.001
@@ -395,7 +395,7 @@ def main():
         used_lr = default_lr
 
         ## Adam
-        optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
+        optimizer_ft = optim.Adam(params_to_update lr = used_lr)#, lr=used_lr)
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
         scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
         # Setup the loss fxn
