@@ -25,19 +25,22 @@ torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
+SCHEDULER = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-default_lr = 0.0004
+default_lr = 0.0001 # best lr for FC layer
 
 
-lr_4 = 0.001
-#lr_fc = 0.01
+
+lr_4 = 0.000001
+lr_fc = 0.0001
 
 """ SEARCH PARAMS """
 
-coarse_lr = np.array([0.09, 0.01, 0.009, 0.005, 0.001, 0.0005, 0.0001, 0.000005])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+coarse_lr = np.array([0.0001,  0.00008, 0.00005, 0.000023, 0.000007])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
 
@@ -236,7 +239,7 @@ def initialize_model(model_name, num_classes,lr, use_pretrained=True):
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
-    params_to_update = [{"params": model_ft.fc.parameters(), "lr":lr}]#{"params": model_ft.layer4.parameters(), "lr":lr_4},
+    params_to_update = [{"params": model_ft.fc.parameters(), "lr":lr_fc}, {"params": model_ft.layer4.parameters(), "lr":lr_4}]
                         
 
     model_ft = model_ft.to(device)
@@ -395,9 +398,13 @@ def main():
         used_lr = default_lr
 
         ## Adam
-        optimizer_ft = optim.Adam(params_to_update lr = used_lr)#, lr=used_lr)
-        #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
-        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
+        optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
+        if SCHEDULER:
+            #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
+            scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
+        else:
+            scheduler = None
+        
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
