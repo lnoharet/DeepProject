@@ -415,7 +415,7 @@ def main():
         #plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
         #plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
-    torch.save(model_ft, "/model.pt")
+    torch.save(model_ft, "model.pt")
     print("saved")
 
     """ BASELINE """
