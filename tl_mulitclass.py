@@ -239,7 +239,7 @@ def initialize_model(model_name, num_classes,lr, use_pretrained=True):
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
-    params_to_update = [{"params": model_ft.fc.parameters(), "lr":lr_fc}, {"params": model_ft.layer4.parameters(), "lr":lr_4}]
+    params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lr_4}, {"params": model_ft.fc.parameters(), "lr":lr_fc}]
                         
 
     model_ft = model_ft.to(device)
@@ -253,6 +253,7 @@ def initialize_model(model_name, num_classes,lr, use_pretrained=True):
     for name,param in model_ft.named_parameters():
         if param.requires_grad == True:
             params_to_update.append(param)
+    print(params_to_update)
     
     
 
