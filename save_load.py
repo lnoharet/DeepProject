@@ -370,13 +370,11 @@ def download_data():
 
 
 def main():
-    model_ft = torch.load("model.pt")
-    model_ft.eval()
+    #model_ft = torch.load("model.pt")
+    #model_ft.eval()
     # Load pretrained model
     print("Initializing model")
-    input_size = 224
-    params_to_update = [{"params": model_ft.fc.parameters(), "lr": 0.0001}]
-    #model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
+    model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
     #print(model_ft)
 
     # Print the params to fine-tune
@@ -417,8 +415,8 @@ def main():
         #plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
         #plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
-    #torch.save(model_ft, "model.pt")
-    #print("saved")
+    torch.save(model_ft, "model.pt")
+    print("saved")
 
     """ BASELINE """
     ## Calculate baseline for comparison
