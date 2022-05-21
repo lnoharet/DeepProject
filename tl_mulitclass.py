@@ -34,7 +34,7 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 
-lr_4 = 0.00001
+lr_4 = 7e-6
 lr_fc = 0.0001
 
 """ SEARCH PARAMS """
@@ -247,10 +247,9 @@ def initialize_model(model_name, num_classes,lr, use_pretrained=True):
     params_to_list = ["fc.weight", "fc.bias"]
     for name,param in model_ft.named_parameters():
         print(name)
-        if "layer4" in name:
+        if "layer4" in name and "bn" not in name :
             params_to_list.append(name)
     freeze_all_params(model_ft, params_to_list)
-
     #params_to_update = []
     #    for name,param in model_ft.named_parameters():
     #    if param.requires_grad == True:
