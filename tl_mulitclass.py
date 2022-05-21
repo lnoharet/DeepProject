@@ -243,16 +243,18 @@ def initialize_model(model_name, num_classes,lr, use_pretrained=True):
                         
 
     model_ft = model_ft.to(device)
+    #print(model_ft)
     params_to_list = ["fc.weight", "fc.bias"]
     for name,param in model_ft.named_parameters():
+        print(name)
         if "layer4" in name:
             params_to_list.append(name)
     freeze_all_params(model_ft, params_to_list)
 
     #params_to_update = []
-    """    for name,param in model_ft.named_parameters():
-        if param.requires_grad == True:
-            params_to_update.append(param)"""
+    #    for name,param in model_ft.named_parameters():
+    #    if param.requires_grad == True:
+    #        params_to_update.append(param)"""
     
     
 
