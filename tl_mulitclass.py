@@ -33,13 +33,13 @@ DATA_SUBSET = None # None = whole dataset
 default_lr = 0.0001 # best lr for FC layer
 
 
-
+lr_3 = 1e-7
 lr_4 = 7e-6
 lr_fc = 0.0001
 
 """ SEARCH PARAMS """
 
-coarse_lr = np.array([ 3e-6, 2.5e-6, 2e-6, 1.5e-6, 1e-6 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+coarse_lr = np.array([ 2.5e-6, 2.25e-6, 2e-6, 1.75e-6, 1.5e-6, 1.25e-6 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
@@ -219,7 +219,7 @@ def test_model(model, dataloaders):
     return acc_history
 
 
-def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4,  use_pretrained=True):
+def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lr_3 =lr_3 , use_pretrained=True):
     # Initialize these variables which will be set in this if statement. Each of these
     #   variables is model specific.
     model_ft = None
@@ -239,14 +239,19 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4,  us
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
+    # params_to_update = [{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
+
     params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
                         
 
     model_ft = model_ft.to(device)
     params_to_list = ["fc.weight", "fc.bias"]
     for name, param in model_ft.named_parameters():
-        if "layer4" in name and "bn" not in name :
-            params_to_list.append(name)
+        if "bn" not in name :
+            if "layer4" in name:
+                params_to_list.append(name)
+            #if "layer3" in name: 
+            #    params_to_list.append(name)
     freeze_all_params(model_ft, params_to_list)
     #params_to_update = []
     #    for name,param in model_ft.named_parameters():
@@ -313,7 +318,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
         f.write('\n')
         for idx, val in enumerate(val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
-            print("lr=",coarse_lr[idx], ",val =",val.item()*100, "% | test=",test_acc[idx],'%' )
+            print("lr=",coarse_lr[idx], ",val =",val.item()*100, "% | test=",test_accs[idx],'%' )
         f.close()
 
         plot_parameter_search(coarse_lr, val_accuracies )
