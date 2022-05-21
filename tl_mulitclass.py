@@ -250,10 +250,9 @@ def initialize_model(model_name, num_classes,lr, use_pretrained=True):
     freeze_all_params(model_ft, params_to_list)
 
     #params_to_update = []
-    for name,param in model_ft.named_parameters():
+    """    for name,param in model_ft.named_parameters():
         if param.requires_grad == True:
-            params_to_update.append(param)
-    print(params_to_update)
+            params_to_update.append(param)"""
     
     
 
