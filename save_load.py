@@ -370,7 +370,7 @@ def download_data():
 
 
 def main():
-    model_ft = torch.load("/model.pt")
+    model_ft = torch.load("model.pt")
     model_ft.eval()
     # Load pretrained model
     print("Initializing model")
