@@ -39,7 +39,7 @@ lr_fc = 0.0001
 
 """ SEARCH PARAMS """
 
-coarse_lr = np.array([ 2.5e-6, 2.25e-6, 2e-6, 1.75e-6, 1.5e-6, 1.25e-6 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+coarse_lr = np.array([3e-6])#[ 2.5e-6, 2.25e-6, 2e-6, 1.75e-6, 1.5e-6, 1.25e-6 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
@@ -247,7 +247,7 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lr_
     model_ft = model_ft.to(device)
     params_to_list = ["fc.weight", "fc.bias"]
     for name, param in model_ft.named_parameters():
-        if "bn" not in name :
+        #if "bn" not in name :
             if "layer4" in name:
                 params_to_list.append(name)
             #if "layer3" in name: 
