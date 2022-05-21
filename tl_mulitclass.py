@@ -32,9 +32,8 @@ data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
 default_lr = 0.0001 # best lr for FC layer
 
-
 lr_3 = 1e-7
-lr_4 = 7e-6
+lr_4 = 2e-6
 lr_fc = 0.0001
 
 """ SEARCH PARAMS """
@@ -239,9 +238,9 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
-    params_to_update = [{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
-
-    #params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
+    
+    #params_to_update = [{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
+    params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
                         
 
     model_ft = model_ft.to(device)
@@ -250,8 +249,8 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
         if "bn" not in name :
             if "layer4" in name:
                 params_to_list.append(name)
-            if "layer3" in name: 
-                params_to_list.append(name)
+            #if "layer3" in name: 
+            #    params_to_list.append(name)
     freeze_all_params(model_ft, params_to_list)
     #params_to_update = []
     #    for name,param in model_ft.named_parameters():
@@ -296,7 +295,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
 
 
         for lr in coarse_lr:
-            model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay3_lr=lr)
+            model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay4_lr=lr)
             # Train model with lr
             optimizer_ft = optim.Adam(params_to_update, lr=lr)
             # Setup the loss fxn
