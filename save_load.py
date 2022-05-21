@@ -25,7 +25,7 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
-DATA_SUBSET = 10#None                                  # None = whole dataset
+DATA_SUBSET = None                                  # None = whole dataset
 
 """ Runnning options """
 PARAM_SEARCH = False#True
@@ -72,7 +72,8 @@ class CustomDataset(Dataset):
             ])
         else:
             self.transform = transforms.Compose([
-                transforms.Resize(input_size),
+                transforms.RandomHorizontalFlip(),
+		transforms.Resize(input_size),
                 transforms.CenterCrop(input_size),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -370,18 +371,18 @@ def download_data():
 
 
 def main():
-    #model_ft = torch.load("model.pt")
-    #model_ft.eval()
+    model_ft = torch.load("model.pt")
+    model_ft.eval()
     # Load pretrained model
     print("Initializing model")
-    model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
+    #model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
     #print(model_ft)
-
+    input_size = 224
     # Print the params to fine-tune
-    print("Params to learn:")
-    for name,param in model_ft.named_parameters():
-        if param.requires_grad == True:
-            print("\t",name)
+    #print("Params to learn:")
+    #for name,param in model_ft.named_parameters():
+    #    if param.requires_grad == True:
+            #print("\t",name)
 
     # Setup dataloaders
     #download_data()
@@ -396,15 +397,15 @@ def main():
         used_lr = default_lr
 
         # Adam
-        optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
+        #optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
         # Learning rate scheduler, set to None to use used_lr
         scheduler = None #torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
         # Train and evaluate
-        print('--- Training with adam ---')
-        model_ft, train_acc_hist, val_acc_hist, train_loss_hist, val_loss_hist, lrs = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
+        #print('--- Training with adam ---')
+        #model_ft, train_acc_hist, val_acc_hist, train_loss_hist, val_loss_hist, lrs = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler, num_epochs=num_epochs, is_inception=(model_name=="inception"))
 
         # Eval model on test data
         print('--- Testing model on testdata ---')
