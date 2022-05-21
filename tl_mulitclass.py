@@ -34,7 +34,7 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 
-lr_4 = 0.000001
+lr_4 = 0.00001
 lr_fc = 0.0001
 
 """ SEARCH PARAMS """
