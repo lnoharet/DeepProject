@@ -375,7 +375,7 @@ def main():
     # Load pretrained model
     print("Initializing model")
     input_size = 224
-    params_to_update = [{"params": model_ft.fc.parameters(), "lr": lr}]
+    params_to_update = [{"params": model_ft.fc.parameters(), "lr": 0.0001}]
     #model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, default_lr , use_pretrained=True)
     #print(model_ft)
 
