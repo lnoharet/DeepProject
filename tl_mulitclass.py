@@ -39,7 +39,7 @@ lr_fc = 0.0001
 
 """ SEARCH PARAMS """
 
-coarse_lr = np.array([1e-6, 6e-7, 1e-7, 6e-8])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+coarse_lr = np.array([5e-6, 3e-6, 1e-6, 8e-7, 6e-7])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
@@ -246,7 +246,7 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4,  us
     params_to_list = ["fc.weight", "fc.bias"]
     for name,param in model_ft.named_parameters():
         print(name)
-        if "layer4" in name:# and "bn" not in name :
+        if "layer4" in name and "bn" not in name :
             params_to_list.append(name)
     freeze_all_params(model_ft, params_to_list)
     #params_to_update = []
@@ -302,7 +302,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             model_ft, train_hist, hist, train_loss, val_loss = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
             
             test_acc = test_model(model_ft, test_data)[-1].item()*100
-            test_accs.append(test_acc)
+            print('test acc for lr={} is {} %'.format(lr, test_acc))
             plot(train_loss, val_loss, 'loss', lr, test_acc)
             plot(train_hist, hist, 'acc', lr, test_acc)
 
@@ -314,7 +314,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
         f.write('\n')
         for idx, val in enumerate(val_accuracies):
             f.write(str(coarse_lr[idx])+ ", " + str(val.item()*100)+ "%\n" )
-            print( coarse_lr[idx], ", val=",val.item()*100, "% | test=", test_acc[idx], "%" )
+            print("(", coarse_lr[idx], ",",val.item()*100, "% )" )
         f.close()
 
         plot_parameter_search(coarse_lr, val_accuracies )
