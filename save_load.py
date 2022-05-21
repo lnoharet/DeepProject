@@ -416,7 +416,7 @@ def main():
         plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
     torch.save(model_ft, "/model.pt")
-    print("saved"
+    print("saved")
 
     """ BASELINE """
     ## Calculate baseline for comparison
