@@ -25,7 +25,7 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 data_dir = "./data/oxford-iiit-pet"                 # Top level data directory.
-DATA_SUBSET = None                                  # None = whole dataset
+DATA_SUBSET = 10#None                                  # None = whole dataset
 
 """ Runnning options """
 PARAM_SEARCH = True
@@ -416,7 +416,7 @@ def main():
         plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
     torch.save(model_ft, "/model.pt")
-
+    print("saved"
 
     """ BASELINE """
     ## Calculate baseline for comparison
