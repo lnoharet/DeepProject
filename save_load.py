@@ -41,7 +41,7 @@ lr_4 = 0.001
 #lr_fc = 0.01
 
 """ Search params """
-coarse_lr = np.array([0.09, 0.01, 0.009, 0.005, 0.001, 0.0005, 0.0001, 0.000005])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+coarse_lr = np.array([0.0001])#, 0.01, 0.009, 0.005, 0.001, 0.0005, 0.0001, 0.000005])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
 
@@ -398,7 +398,7 @@ def main():
         # Adam
         optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
         # Learning rate scheduler, set to None to use used_lr
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
+        #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
@@ -411,9 +411,9 @@ def main():
         test_acc = test_model(model_ft, test_data)[-1].item()*100
         print("Test Acc = ", test_acc)
 
-        plot_lrs(lrs)
-        plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
-        plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
+        #plot_lrs(lrs)
+        #plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc, 4))
+        #plot(train_acc_hist, val_acc_hist, "acc", used_lr, round(test_acc, 4))
 
     torch.save(model_ft, "/model.pt")
     print("saved")
