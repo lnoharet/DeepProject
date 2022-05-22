@@ -24,7 +24,7 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
-PARAM_SEARCH = True
+PARAM_SEARCH = False
 LOAD_SAVE = False
 SCHEDULE = None #'1cycle' # ExpLR
 
