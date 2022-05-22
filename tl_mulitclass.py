@@ -251,6 +251,8 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     input_size = 224
     params_to_update = []
     all_layers =[{"params": model_ft.layer1.parameters(), "lr":lay1_lr},{"params": model_ft.layer2.parameters(), "lr":lay2_lr},{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}].reverse()
+    print(params_to_update)
+
     for l in range(ft_layers):
         params_to_update.append(all_layers[l])
     print(params_to_update)
