@@ -338,7 +338,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
-            model_ft, train_hist, hist, train_loss, val_loss = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
+            model_ft, train_hist, hist, train_loss, val_loss, lrs = train_model(model_ft, dataloader_dict, criterion, optimizer_ft, num_epochs=num_epochs, is_inception=(model_name=="inception"), used_lr = lr)
             
             test_acc = test_model(model_ft, test_data)[-1].item()*100
             test_accs.append(test_acc)
@@ -461,7 +461,7 @@ def main():
 
             # Train and evaluate
             print('--- Training with adam ---')
-            model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            model_ft, train_hist, hist, train_loss_hist, val_loss_hist,_ = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
             
             plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
             plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
