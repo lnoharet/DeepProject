@@ -37,7 +37,7 @@ default_lr = 0.0001 # best lr for FC layer
 BN = False # false = exclude BN params from fine tuning
 ft_layers = 2 # idx 1-5
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
-parameter_search_layer = 'fc' # for parameter search
+parameter_search_layer = '4' # for parameter search
 lr_1 = 0
 lr_2 = 0
 lr_3 = 1e-7
