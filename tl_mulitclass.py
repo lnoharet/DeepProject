@@ -24,7 +24,7 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
-PARAM_SEARCH = True
+PARAM_SEARCH = False
 LOAD_SAVE = False
 SCHEDULE = None #'1cycle' # ExpLR
 
@@ -35,14 +35,16 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
-ft_layers = 3 # idx 1-5 set how many layers to fine tune
+ft_layers = 2 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
-parameter_search_layer = '3' # set which layer to perform parameter search on. 
+parameter_search_layer = '4' # set which layer to perform parameter search on. 
 lr_1 = 0
 lr_2 = 0
 lr_3 = 1e-7
-lr_4 = 2.9e-6
+lr_4 = 3e-6
 lr_fc = 0.0001
+
+WD = 1e-10
 
 """ SEARCH PARAMS """
 
@@ -334,7 +336,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
                 model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay4_lr=lr)
 
             # Train model with lr
-            optimizer_ft = optim.Adam(params_to_update, lr=lr, weight_decay =1e-6)
+            optimizer_ft = optim.Adam(params_to_update, lr=lr, weight_decay =WD)
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
