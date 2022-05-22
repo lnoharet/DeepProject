@@ -38,18 +38,18 @@ lr_fc = 0.0001
 
 """ SEARCH PARAMS """
 
-coarse_lr = np.array([ 1 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+#coarse_lr = np.array([ ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
 
-l_max = 0.000022
-l_min = 0.000027
-#coarse_lr = []
-#for i in range(0,5):
-#    lr = l_min + (l_max-l_min)*random.uniform(0,1)
-#    coarse_lr.append(lr)
-#coarse_lr = np.array(coarse_lr)
+l_max = 3e-6
+l_min = 1e-6
+coarse_lr = []
+for i in range(0,5):
+    lr = l_min + (l_max-l_min)*random.uniform(0,1)
+    coarse_lr.append(lr)
+coarse_lr = np.array(coarse_lr)
 
 
 # Models from [resnet18, resnet34]
@@ -238,9 +238,9 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
     input_size = 224
-    params_to_update = [{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
+    #params_to_update = [{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
 
-    #params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
+    params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
                         
 
     model_ft = model_ft.to(device)
@@ -249,8 +249,8 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
         if "bn" not in name :
             if "layer4" in name:
                 params_to_list.append(name)
-            if "layer3" in name: 
-                params_to_list.append(name)
+            #if "layer3" in name: 
+            #    params_to_list.append(name)
     freeze_all_params(model_ft, params_to_list)
     #params_to_update = []
     #    for name,param in model_ft.named_parameters():
@@ -295,7 +295,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
 
 
         for lr in coarse_lr:
-            model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay3_lr=lr)
+            model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay4_lr=lr)
             # Train model with lr
             optimizer_ft = optim.Adam(params_to_update, lr=lr)
             # Setup the loss fxn
