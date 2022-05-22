@@ -24,9 +24,9 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
-PARAM_SEARCH = False
+PARAM_SEARCH = True
 LOAD_SAVE = False
-SCHEDULE = '1cycle' # ExpLR
+SCHEDULE = None #'1cycle' # ExpLR
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -35,9 +35,9 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
-ft_layers = 3 # idx 1-5
+ft_layers = 2 # idx 1-5
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
-
+parameter_search_layer = 'fc' # for parameter search
 lr_1 = 0
 lr_2 = 0
 lr_3 = 1e-7
@@ -46,19 +46,19 @@ lr_fc = 0.0001
 
 """ SEARCH PARAMS """
 
-coarse_lr = np.array([ 1e-6, 1e-7, 1e-8, 1e-9 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
+#coarse_lr = np.array([ 1e-6, 1e-7, 1e-8, 1e-9 ])#, 0.0000095, 0.00001, 0.000015, 0.00002, 0.000025, 0.00003, 0.000035, 0.00004])
 
 #coarse_lr = np.array([0.00001,0.00002,0.00003,0.00004,0.00005,0.00006,0.00007,0.00008,0.00009])
 #coarse_lr = np.array([0.0009, 0.0095])
-"""
-l_max = 3e-6
-l_min = 1e-6
+
+l_max = 1.1e-6
+l_min = 1e-07
 coarse_lr = []
 for i in range(0,10):
     lr = l_min + (l_max-l_min)*random.uniform(0,1)
     coarse_lr.append(lr)
 coarse_lr = np.array(coarse_lr)
-"""
+
 
 
 # Models from [resnet18, resnet34]
@@ -313,14 +313,24 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
  
         ## COARSE SEARCH
         print('--- PARAMETER SEARCH ---')
-        print('Searched parameters:', coarse_lr)
+        print('Searched parameters:', coarse_lr, 'for layer', parameter_search_layer)
  
         val_accuracies = [] 
         test_accs = []
 
 
         for lr in coarse_lr:
-            model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay3_lr=lr)
+            if parameter_search_layer == 'fc':
+                model_ft, _, params_to_update = initialize_model(model_name, num_classes, fc_lr=lr)
+            elif parameter_search_layer == '1':
+                model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay1_lr=lr)
+            elif parameter_search_layer == '2':
+                model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay2_lr=lr)
+            elif parameter_search_layer == '3':
+                model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay3_lr=lr)
+            elif parameter_search_layer == '4':
+                model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay4_lr=lr)
+
             # Train model with lr
             optimizer_ft = optim.Adam(params_to_update, lr=lr)
             # Setup the loss fxn
@@ -346,7 +356,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
         f.close()
 
         plot_parameter_search(coarse_lr, val_accuracies )
-        best_found = np.take(coarse_lr, np.argsort(val_accuracies)[-1:])
+        best_found = np.take(coarse_lr, np.argsort(test_accs)[-1:])
 
         return best_found
 
@@ -427,7 +437,7 @@ def main():
     if PARAM_SEARCH:
         ### Learning rate search:
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
-        print("Parameter search yielded best lr =", best_lr[0])
+        print("Parameter search yielded best test acc with lr =", best_lr[0])
         used_lr = best_lr[0]
     else:
         used_lr = default_lr
