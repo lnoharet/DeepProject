@@ -24,7 +24,7 @@ torch.cuda.manual_seed_all(seed_)
 torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
-PARAM_SEARCH = False
+PARAM_SEARCH = True
 LOAD_SAVE = False
 SCHEDULE = None #'1cycle' # ExpLR
 
@@ -35,9 +35,9 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
-ft_layers = 2 # idx 1-5 set how many layers to fine tune
+ft_layers = 3 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
-parameter_search_layer = '4' # set which layer to perform parameter search on. 
+parameter_search_layer = '3' # set which layer to perform parameter search on. 
 lr_1 = 0
 lr_2 = 0
 lr_3 = 1e-7
@@ -54,7 +54,7 @@ lr_fc = 0.0001
 l_max = 1.1e-6
 l_min = 1e-07
 coarse_lr = []
-for i in range(0,1):
+for i in range(0,10):
     lr = l_min + (l_max-l_min)*random.uniform(0,1)
     coarse_lr.append(lr)
 coarse_lr = np.array(coarse_lr)
@@ -252,11 +252,9 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     params_to_update = []
     all_layers =[{"params": model_ft.layer1.parameters(), "lr":lay1_lr},{"params": model_ft.layer2.parameters(), "lr":lay2_lr},{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
     all_layers.reverse()
-    print(all_layers)
 
     for l in range(ft_layers):
         params_to_update.append(all_layers[l])
-    print(params_to_update)
         
 
     #params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
