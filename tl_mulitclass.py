@@ -251,8 +251,8 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     input_size = 224
     params_to_update = []
     all_layers =[{"params": model_ft.layer1.parameters(), "lr":lay1_lr},{"params": model_ft.layer2.parameters(), "lr":lay2_lr},{"params": model_ft.layer3.parameters(), "lr":lay3_lr},{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
-    all_layers = all_layers.reverse()
-    print(params_to_update)
+    all_layers.reverse()
+    print(all_layers)
 
     for l in range(ft_layers):
         params_to_update.append(all_layers[l])
@@ -453,6 +453,8 @@ def main():
                 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
             if SCHEDULE == 'ExpLR':
                 scheduler =  torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
+            else:
+                scheduler = None
 
             
 
