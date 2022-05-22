@@ -41,7 +41,7 @@ parameter_search_layer = '3' # set which layer to perform parameter search on.
 lr_1 = 0
 lr_2 = 0
 lr_3 = 1e-7
-lr_4 = 1e-6
+lr_4 = 2.9e-6
 lr_fc = 0.0001
 
 """ SEARCH PARAMS """
@@ -52,9 +52,9 @@ lr_fc = 0.0001
 #coarse_lr = np.array([0.0009, 0.0095])
 
 l_max = 1.2e-6
-l_min = 8e-07
+l_min = 7e-07
 coarse_lr = []
-for i in range(0,5):
+for i in range(0,10):
     lr = l_min + (l_max-l_min)*random.uniform(0,1)
     coarse_lr.append(lr)
 coarse_lr = np.array(coarse_lr)
@@ -301,7 +301,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.close()
     return
 
-def (lrs):
+def plot_lrs(lrs):
     plt.plot(lrs)
     plt.xlabel('epoch')
     plt.ylabel('learning rate')
@@ -334,7 +334,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
                 model_ft, _, params_to_update = initialize_model(model_name, num_classes, lay4_lr=lr)
 
             # Train model with lr
-            optimizer_ft = optim.Adam(params_to_update, lr=lr)
+            optimizer_ft = optim.Adam(params_to_update, lr=lr, weight_decay =1e-6)
             # Setup the loss fxn
             criterion = nn.CrossEntropyLoss()
             # Train and evaluate
