@@ -46,7 +46,7 @@ lr_fc = 0.0001
 l_max = 3e-6
 l_min = 1e-6
 coarse_lr = []
-for i in range(0,5):
+for i in range(0,10):
     lr = l_min + (l_max-l_min)*random.uniform(0,1)
     coarse_lr.append(lr)
 coarse_lr = np.array(coarse_lr)
