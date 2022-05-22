@@ -435,11 +435,11 @@ def main():
         if not LOAD_SAVE: 
             ## Adam
             optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
-            if SCHEDULE:
-                #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
+            if SCHEDULE == '1cycles':
                 scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
-            else:
-                scheduler = None
+            if SCHEDULE == 'ExpLR':
+                scheduler =  torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
+
             
 
             # Setup the loss fxn
