@@ -25,7 +25,8 @@ torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
-SCHEDULER = False
+LOAD_SAVE = False
+SCHEDULE = '1cycle' # ExpLR
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -79,8 +80,8 @@ class CustomDataset(Dataset):
             self.transform = transforms.Compose([
                 # TODO: kolla om det är rätt transforms
                 #transforms.RandomResizedCrop(input_size),
-                transforms.Resize(input_size),
-                transforms.CenterCrop(input_size),
+                transforms.Resize((input_size, input_size)),
+                #transforms.CenterCrop(input_size),
                 #transforms.RandomHorizontalFlip(),
                 #transforms.Resize(input_size),
                 transforms.ToTensor(),
@@ -123,6 +124,8 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
 
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
+
+    lrs = []
 
     for epoch in range(num_epochs):
         if PARAM_SEARCH:
@@ -173,7 +176,8 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
-                        if scheduler:
+                        lrs.append(optimizer.param_groups[0]["lr"]) # track learning rate
+                        if scheduler and SCHEDULE == '1cycle':
                             scheduler.step()
 
 
@@ -183,7 +187,9 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
 
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
             epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
-        
+
+            if scheduler and phase == 'val' and SCHEDULE == 'ExpLR':
+                scheduler.step()
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
@@ -206,7 +212,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model, train_acc_history, val_acc_history, train_loss_history, val_loss_history
+    return model, train_acc_history, val_acc_history, train_loss_history, val_loss_history, lrs
 
 
 def test_model(model, dataloaders):
@@ -293,6 +299,14 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.close()
     return
 
+def plot_lrs(lrs):
+    plt.plot(lrs)
+    plt.xlabel('epoch')
+    plt.ylabel('learning rate')
+    plt.title('Learning rate throughout training')
+    plt.savefig('mul_plots/' + 'eta' + str(round(time.time()) - 1650000000) + '.png')
+    plt.close()
+    return
 
 
 def parameter_search(dataloader_dict, params_to_update, test_data):
@@ -388,9 +402,15 @@ def download_data():
 
 
 def main():
-    
+    print("Initializing model")
+    if LOAD_SAVE:
+        model_ft = torch.load("model.pt")
+        model_ft.eval()
+    else:    
+        model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, use_pretrained=True)
+
     # Load pretrained model
-    model_ft, input_size, params_to_update = initialize_model(model_name, num_classes, use_pretrained=True)
+    # Load pretrained model
     #print(model_ft)
     #downl oad_data()
 
@@ -412,29 +432,36 @@ def main():
     else:
         used_lr = default_lr
 
-        ## Adam
-        optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
-        if SCHEDULER:
-            #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
-            scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
-        else:
-            scheduler = None
-        
-        # Setup the loss fxn
-        criterion = nn.CrossEntropyLoss()
+        if not LOAD_SAVE: 
+            ## Adam
+            optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
+            if SCHEDULE:
+                #scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1, gamma=0.1, last_epoch= -1, verbose=True)
+                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
+            else:
+                scheduler = None
+            
 
-        # Train and evaluate
-        print('--- Training with adam ---')
-        model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            # Setup the loss fxn
+            criterion = nn.CrossEntropyLoss()
 
+            # Train and evaluate
+            print('--- Training with adam ---')
+            model_ft, train_hist, hist, train_loss_hist, val_loss_hist = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            
+            plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
+            plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
 
         # Eval model on test data
         print('--- Testing model on testdata ---')
         test_acc = test_model(model_ft, test_data)[-1].item()*100
         print("Test Acc = ", test_acc)
 
-        plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
-        plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
+        if LOAD_SAVE: 
+            torch.save(model_ft, "model.pt")
+            print("saved")
+
+
 
 
 
