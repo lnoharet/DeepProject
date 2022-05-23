@@ -478,7 +478,7 @@ def main():
             ## Adam
             optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
             if SCHEDULE == '1cycle':
-                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, [0.0005, 8e-6, 5e-6, 5e-7, 5e-8], total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=True)
+                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, [0.0005, 8e-6, 5e-6, 5e-7, 5e-8], total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=1, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=True)
             if SCHEDULE == 'ExpLR':
                 scheduler =  torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
             else:
