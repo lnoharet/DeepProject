@@ -31,16 +31,16 @@ SCHEDULE = None #'1cycle' # ExpLR
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-default_lr = 0.001 # best lr for FC layer
+default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
 ft_layers = 2 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
 parameter_search_layer = '4' # set which layer to perform parameter search on. 
-lr_1 = 1e-9
-lr_2 = 1e-8
-lr_3 = 1e-7
+lr_1 = 1e-8
+lr_2 = 1e-7
+lr_3 = 1e-6
 lr_4 = 3e-6
 lr_fc = 0.0001
 
