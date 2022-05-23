@@ -26,7 +26,7 @@ torch.backends.cudnn.deterministic = True
 """ Runnning Options """
 PARAM_SEARCH = False
 LOAD_SAVE = False
-SCHEDULE = '1cycle' # ExpLR
+SCHEDULE = 'ExpLR'#'1cycle' # ExpLR
 AUGMENT = False
 
 # Top level data directory.
