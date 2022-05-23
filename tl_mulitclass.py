@@ -31,7 +31,7 @@ SCHEDULE = None #'1cycle' # ExpLR
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
 DATA_SUBSET = None # None = whole dataset
-default_lr = 0.0001 # best lr for FC layer
+default_lr = 0.001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
@@ -42,9 +42,9 @@ lr_1 = 0
 lr_2 = 0
 lr_3 = 1e-7
 lr_4 = 3e-6
-lr_fc = 0.0001
+lr_fc = 0.001
 
-WD = 1e-10
+WD = 0
 
 """ SEARCH PARAMS """
 
@@ -69,8 +69,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 37
-batch_size = 8
-num_epochs = 15
+batch_size = 16
+num_epochs = 20
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split):
@@ -256,11 +256,7 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     all_layers.reverse()
 
     for l in range(ft_layers):
-        params_to_update.append(all_layers[l])
-        
-
-    #params_to_update = [{"params": model_ft.layer4.parameters(), "lr":lay4_lr}, {"params": model_ft.fc.parameters(), "lr":fc_lr}]
-                        
+        params_to_update.append(all_layers[l])                        
 
     model_ft = model_ft.to(device)
     params_to_list = []
