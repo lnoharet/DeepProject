@@ -27,6 +27,7 @@ torch.backends.cudnn.deterministic = True
 PARAM_SEARCH = False
 LOAD_SAVE = False
 SCHEDULE = None #'1cycle' # ExpLR
+AUGMENT = True
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -45,6 +46,7 @@ lr_4 = 3e-6
 lr_fc = 0.00015
 
 WD = 0
+NUM_AUGMENTS = 0
 
 """ SEARCH PARAMS """
 
@@ -73,10 +75,12 @@ batch_size = 16
 num_epochs = 15
 
 class CustomDataset(Dataset):
-    def __init__(self, img_paths, labels, input_size, split):
+    def __init__(self, img_paths, labels, input_size, split, aug = False):
             
         self.img_labels = labels
         self.img_paths = img_paths
+        self.split = split
+        
 
         if split == 'trainval':
             self.transform = transforms.Compose([
@@ -89,6 +93,13 @@ class CustomDataset(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
+            self.transform_aug = transforms.Compose([
+                transforms.RandomRotation(20),
+                transforms.RandomResizedCrop(input_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
         else: 
             self.transform = transforms.Compose([
                 transforms.Resize(input_size),
@@ -96,14 +107,25 @@ class CustomDataset(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
+            self.transform_aug = None
    
     def __len__(self):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
         image = load_image(self.img_paths[idx] + '.jpg')
-        label = self.img_labels[idx]    
-        image = self.transform(image)
+        label = self.img_labels[idx]
+        if AUGMENT:
+            if self.split == 'trainval':
+                if idx < int(len(self.img_paths)/2):    
+                    image = self.transform(image)
+                else: 
+                    image = self.transform_aug(image)
+            else: 
+                image = self.transform(image)
+        else: 
+            image = self.transform(image)
+
         return image, label
 
 def load_image(filename) :
@@ -374,10 +396,17 @@ def pre_process_dataset(input_size, subset = None):
                     labels[i].append(label)
                     data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
             else:
-                for line in lines:
-                    label = int(line.split(" ")[1]) - 1  
-                    labels[i].append(label)
-                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+                if AUGMENT and i != 0:
+                    j = 1 + NUM_AUGMENTS
+                else: 
+                    j = 1
+                for _ in range(j):
+                    for line in lines:
+                        label = int(line.split(" ")[1]) - 1  
+                        labels[i].append(label)
+                        data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+                    
+                    
 
 
     trainingval_data = CustomDataset(
@@ -434,6 +463,8 @@ def main():
 
     # Change labels of data to be binary for specie classification
     trainval_data, test_data = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
+    print(len(trainval_data['train']))
+    print(len(trainval_data['val']))
 
     if PARAM_SEARCH:
         ### Learning rate search:
