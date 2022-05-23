@@ -35,14 +35,14 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
-ft_layers = 2 # idx 1-5 set how many layers to fine tune
+ft_layers = 4 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
 parameter_search_layer = '4' # set which layer to perform parameter search on. 
-lr_1 = 1e-8
-lr_2 = 1e-7
-lr_3 = 1e-6
+lr_1 = 3e-10
+lr_2 = 3e-8
+lr_3 = 3e-7
 lr_4 = 3e-6
-lr_fc = 0.0001
+lr_fc = 0.00015
 
 WD = 0
 
@@ -69,7 +69,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 37
-batch_size = 8
+batch_size = 16
 num_epochs = 15
 
 class CustomDataset(Dataset):
