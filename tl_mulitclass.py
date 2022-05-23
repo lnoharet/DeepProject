@@ -26,7 +26,7 @@ torch.backends.cudnn.deterministic = True
 """ Runnning Options """
 PARAM_SEARCH = False
 LOAD_SAVE = False
-SCHEDULE = '1cycle' # ExpLR
+SCHEDULE = None #'1cycle' # ExpLR
 AUGMENT = False
 
 # Top level data directory.
@@ -35,7 +35,7 @@ DATA_SUBSET = None # None = whole dataset
 default_lr = 0.0001 # best lr for FC layer
 
 
-BN = False # false = exclude BN params from fine tuning
+BN = True # false = exclude BN params from fine tuning
 ft_layers = 5 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
 parameter_search_layer = '4' # set which layer to perform parameter search on. 
@@ -203,6 +203,10 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
                         lrs.append(optimizer.param_groups[0]["lr"]) # track learning rate
                         if scheduler and SCHEDULE == '1cycle':
                             scheduler.step()
+
+
+                        # update batch_norm mean and var during training
+                        model_ft.
 
 
                 # statistics
