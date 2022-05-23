@@ -491,8 +491,8 @@ def main():
 
             # Train and evaluate
             print('--- Training with adam ---')
-            model_ft, train_hist, hist, train_loss_hist, val_loss_hist,_ = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
-            
+            model_ft, train_hist, hist, train_loss_hist, val_loss_hist, lrs = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            plot_lrs(lrs)            
 
         # Eval model on test data
         print('--- Testing model on testdata ---')
