@@ -206,7 +206,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
 
 
                         # update batch_norm mean and var during training
-                        model_ft.
+                        #model_ft.
 
 
                 # statistics
