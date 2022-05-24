@@ -47,7 +47,7 @@ lr_4 = 3e-6
 lr_fc = 0.0001
 
 WD = 0
-NUM_AUGMENTS = 0
+NUM_AUGMENTS = 1
 if NUM_AUGMENTS > 0:
     AUGMENT = True
 
@@ -75,7 +75,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Parameters
 num_classes = 37
 batch_size = 16
-num_epochs = 40
+num_epochs = 15#40
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split, aug = False, val=False):
@@ -98,11 +98,12 @@ class CustomDataset(Dataset):
             ])
             self.transform_aug = transforms.Compose([
                 #transforms.RandomRotation(20),
-                #transforms.CenterCrop(input_size),
-                #transforms.Resize((input_size, input_size)),
-                transforms.RandomResizedCrop(input_size),
+                transforms.Resize((input_size, input_size)),
+                transforms.CenterCrop(input_size),
+                #transforms.RandomResizedCrop(input_size),
                 transforms.RandomHorizontalFlip(),
-                #transforms.GaussianBlur((5,9), sigma = (0.1, 5)),
+                transforms.ColorJitter(0.5, 0.1),
+                transforms.GaussianBlur((5,9), sigma = (0.1, 0.2)),
                 transforms.ToTensor(),
                 transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
