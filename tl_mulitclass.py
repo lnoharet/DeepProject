@@ -27,7 +27,7 @@ from PIL import Image
 PARAM_SEARCH = False
 LOAD_SAVE = False
 SCHEDULE = None #'1cycle' # ExpLR
-AUGMENT = True
+AUGMENT = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -95,6 +95,7 @@ class CustomDataset(Dataset):
                 #transforms.Resize((input_size, input_size)),
                 transforms.RandomResizedCrop(input_size),
                 transforms.RandomHorizontalFlip(),
+                #transforms.GaussianBlur((5,9), sigma = (0.1, 5)),
                 transforms.ToTensor(),
                 transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
