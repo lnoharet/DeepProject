@@ -90,7 +90,7 @@ class CustomDataset(Dataset):
                 transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
             self.transform_aug = transforms.Compose([
-                transforms.RandomRotation(20),
+                #transforms.RandomRotation(20),
                 #transforms.CenterCrop(input_size),
                 #transforms.Resize((input_size, input_size)),
                 transforms.RandomResizedCrop(input_size),
@@ -122,7 +122,8 @@ class CustomDataset(Dataset):
         label = self.img_labels[idx]
         if AUGMENT:
             if self.split == 'train':
-                if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
+                if idx > len(self.img_paths)/(NUM_AUGMENTS+1):
+                #if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
                     image = self.transform(image)
                 else: 
                     image = self.transform_aug(image)
@@ -393,6 +394,7 @@ def parameter_search(dataloader_dict, params_to_update, test_data):
 
 
 def pre_process_dataset(input_size, subset = None):
+    """
     files = ['./data/oxford-iiit-pet/annotations/test.txt', './data/oxford-iiit-pet/annotations/trainval.txt']
     data = [[] for i in range(len(files))]
     labels = [[] for i in range(len(files))]
@@ -415,14 +417,32 @@ def pre_process_dataset(input_size, subset = None):
                         label = int(line.split(" ")[1]) - 1  
                         labels[i].append(label)
                         data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+    """    
+    files = ['./data/oxford-iiit-pet/annotations/test.txt', './data/oxford-iiit-pet/annotations/trainval.txt']
+    data = [[] for i in range(len(files))]
+    labels = [[] for i in range(len(files))]
+    for i in range(len(files)):
+        with open(files[i]) as f:
+            lines = f.readlines()
+            lines = np.random.permutation(lines)
+            if subset:
+                for line in np.random.permutation(lines)[:subset]:
+                    label = int(line.split(" ")[1]) - 1   
+                    labels[i].append(label)
+                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))
+            else:
+                for line in lines:
+                    label = int(line.split(" ")[1]) - 1  
+                    labels[i].append(label)
+                    data[i].append('./data/oxford-iiit-pet/images/'+str(line.split(" ")[0]))                
                     
-                    
-
+    train_datasubset = data[1][:int(len(data[1])*0.8)]
+    train_labelsubset = labels[1][:int(len(labels[1])*0.8)]
 
     train_dataset = CustomDataset(
         split = 'train',
-        img_paths=data[1][:int(len(data[1])*0.8)],
-        labels=labels[1][:int(len(data[1])*0.8)],
+        img_paths=np.concatenate((train_datasubset,train_datasubset)),
+        labels=np.concatenate((train_labelsubset,train_labelsubset)),
         input_size = input_size
     )
     val_dataset = CustomDataset(
@@ -451,7 +471,7 @@ def pre_process_dataset(input_size, subset = None):
     return dataloaders_dict, dataloaders_dictest
 
 def download_data():
-    trainingval_data = torchvision.datasets.OxfordIIITPet(
+    torchvision.datasets.OxfordIIITPet(
     root = "data",
     download = True
     )
