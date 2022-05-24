@@ -97,15 +97,13 @@ class CustomDataset(Dataset):
                 #transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
             self.transform_aug = transforms.Compose([
-                #transforms.RandomRotation(20),
                 transforms.Resize((input_size, input_size)),
                 transforms.CenterCrop(input_size),
-                #transforms.RandomResizedCrop(input_size),
                 transforms.RandomHorizontalFlip(),
                 transforms.ColorJitter(0.5, 0.1),
                 transforms.GaussianBlur((5,9), sigma = (0.1, 0.2)),
                 transforms.ToTensor(),
-                transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
         elif split == 'val': 
             self.transform = transforms.Compose([
