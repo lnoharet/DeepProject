@@ -330,7 +330,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.title(mode + ' with lr=' + str(used_lr) + ' n_batch=' + str(batch_size) + ' test_acc=' + str(test_acc))
     plt.legend()
     if mode == "acc":  plt.ylim([0, 1])
-    plt.savefig('mul_plots/' + mode + str(round(time.time()) - 1650000000) + '.png')
+    plt.savefig('mul_plots/' + mode + str(round(time.time()) - 1650000000)+str(model_name[6])+str(model_name[7]) +"_lay"+ str(ft_layers)+"_bs"+str(batch_size)+"_eph"+str(num_epochs)+'.png')
     plt.close()
     return
 
@@ -339,7 +339,7 @@ def plot_lrs(lrs):
     plt.xlabel('epoch')
     plt.ylabel('learning rate')
     plt.title('Learning rate throughout training')
-    plt.savefig('mul_plots/' + 'eta' + str(round(time.time()) - 1650000000) + '.png')
+    plt.savefig('mul_plots/' + 'eta' + str(round(time.time()) - 1650000000)+str(model_name[6])+str(model_name[7]) +"_lay"+ str(ft_layers)+"_bs"+str(batch_size)+"_eph"+str(num_epochs)+'.png')
     plt.close()
     return
 
