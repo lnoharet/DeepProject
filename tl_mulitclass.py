@@ -18,10 +18,10 @@ import copy
 from glob import glob
 from PIL import Image
 
-seed_ = 0.444
-torch.manual_seed(seed_)
-torch.cuda.manual_seed_all(seed_)
-torch.backends.cudnn.deterministic = True
+#seed_ = 0.444
+#torch.manual_seed(seed_)
+#torch.cuda.manual_seed_all(seed_)
+#torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
@@ -91,8 +91,9 @@ class CustomDataset(Dataset):
             ])
             self.transform_aug = transforms.Compose([
                 transforms.RandomRotation(20),
-                transforms.CenterCrop(input_size),
-                #transforms.RandomResizedCrop(input_size),
+                #transforms.CenterCrop(input_size),
+                #transforms.Resize((input_size, input_size)),
+                transforms.RandomResizedCrop(input_size),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
@@ -124,6 +125,7 @@ class CustomDataset(Dataset):
                 if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
                     image = self.transform(image)
                 else: 
+                    print('AUGMENT')
                     image = self.transform_aug(image)
             else: 
                 image = self.transform(image)
@@ -490,9 +492,9 @@ def main():
     print(len(trainval_data['train']))
     print(len(trainval_data['val']))
     #view_image(trainval_data['val'])
-    #view_image(trainval_data['train'])
+    view_image(trainval_data['train'])
 
-    
+    """    
     if PARAM_SEARCH:
         ### Learning rate search:
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
@@ -532,7 +534,7 @@ def main():
         else:
             plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
             plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
-
+    """
     """ Calculate batch mean and std"""
     if False:
         dataloader = test_data['test']
@@ -549,8 +551,6 @@ def main():
 
         print(mean)
         print(std)
-
-
 
 
 
