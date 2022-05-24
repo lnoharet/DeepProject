@@ -73,7 +73,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 37
-batch_size = 16
+batch_size = 32
 num_epochs = 30
 
 class CustomDataset(Dataset):
@@ -86,7 +86,7 @@ class CustomDataset(Dataset):
 
         if split == 'train':
             self.transform = transforms.Compose([
-                #transforms.Resize(input_size),
+                transforms.Resize(input_size),
                 transforms.CenterCrop(input_size),
                 #transforms.Resize((input_size, input_size)),
                 transforms.ToTensor(),
@@ -105,7 +105,7 @@ class CustomDataset(Dataset):
             ])
         elif split == 'val': 
             self.transform = transforms.Compose([
-                #transforms.Resize(input_size),
+                transforms.Resize(input_size),
                 transforms.CenterCrop(input_size),
                 #transforms.Resize((input_size,input_size)),
                 #transforms.CenterCrop(input_size),
@@ -114,7 +114,7 @@ class CustomDataset(Dataset):
             ])
         else:
             self.transform = transforms.Compose([
-                #transforms.Resize(input_size),
+                transforms.Resize(input_size),
                 transforms.CenterCrop(input_size),
 
                 #transforms.Resize((input_size,input_size)),
