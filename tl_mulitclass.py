@@ -420,14 +420,14 @@ def pre_process_dataset(input_size, subset = None):
 
     train_dataset = CustomDataset(
         split = 'train',
-        img_paths=data[1][:int(len(data)*0.8)],
-        labels=labels[1][:int(len(data)*0.8)],
+        img_paths=data[1][:int(len(data[1])*0.8)],
+        labels=labels[1][:int(len(data[1])*0.8)],
         input_size = input_size
     )
     val_dataset = CustomDataset(
         split = 'val',
-        img_paths=data[1][int(len(data)*0.8):],
-        labels=labels[1][int(len(data)*0.8):],
+        img_paths=data[1][int(len(data[1])*0.8):],
+        labels=labels[1][int(len(data[1])*0.8):],
         input_size = input_size
     )
     test_data = CustomDataset(
