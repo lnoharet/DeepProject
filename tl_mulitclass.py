@@ -450,7 +450,7 @@ def pre_process_dataset(input_size, subset = None):
             train_l = np.concatenate((train_l,train_labelsubset))
             
     else:
-        train_d = train_dataset
+        train_d = train_datasubset
         train_l = train_labelsubset
 
     train_dataset = CustomDataset(
