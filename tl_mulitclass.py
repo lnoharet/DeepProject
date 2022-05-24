@@ -73,7 +73,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 37
-batch_size = 32
+batch_size = 16
 num_epochs = 30
 
 class CustomDataset(Dataset):
