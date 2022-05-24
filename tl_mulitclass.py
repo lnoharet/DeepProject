@@ -492,9 +492,9 @@ def main():
     print(len(trainval_data['train']))
     print(len(trainval_data['val']))
     #view_image(trainval_data['val'])
-    view_image(trainval_data['train'])
+    #view_image(trainval_data['train'])
 
-    """    
+    
     if PARAM_SEARCH:
         ### Learning rate search:
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
@@ -534,7 +534,7 @@ def main():
         else:
             plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
             plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
-    """
+
     """ Calculate batch mean and std"""
     if False:
         dataloader = test_data['test']
