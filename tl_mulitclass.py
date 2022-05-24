@@ -532,7 +532,6 @@ def main():
         else:
             plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
             plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
-        """
 
     """ Calculate batch mean and std"""
     if False:
