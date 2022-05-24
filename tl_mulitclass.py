@@ -27,7 +27,7 @@ from PIL import Image
 PARAM_SEARCH = False
 LOAD_SAVE = False
 SCHEDULE = None #'1cycle' # ExpLR
-AUGMENT = True
+AUGMENT = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -46,7 +46,9 @@ lr_4 = 3e-6
 lr_fc = 0.0001
 
 WD = 0
-NUM_AUGMENTS = 1
+NUM_AUGMENTS = 0
+if NUM_AUGMENTS > 0:
+    AUGMENT = True
 
 """ SEARCH PARAMS """
 
@@ -95,6 +97,7 @@ class CustomDataset(Dataset):
                 #transforms.Resize((input_size, input_size)),
                 transforms.RandomResizedCrop(input_size),
                 transforms.RandomHorizontalFlip(),
+                #transforms.GaussianBlur((5,9), sigma = (0.1, 5)),
                 transforms.ToTensor(),
                 transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
@@ -439,10 +442,21 @@ def pre_process_dataset(input_size, subset = None):
     train_datasubset = data[1][:int(len(data[1])*0.8)]
     train_labelsubset = labels[1][:int(len(labels[1])*0.8)]
 
+    if AUGMENT or NUM_AUGMENTS != 0: 
+        train_d = np.concatenate((train_datasubset,train_datasubset))
+        train_l = np.concatenate((train_labelsubset,train_labelsubset))
+        for _ in range(NUM_AUGMENTS-1):
+            train_d = np.concatenate((train_d,train_datasubset))
+            train_l = np.concatenate((train_l,train_labelsubset))
+            
+    else:
+        train_d = train_datasubset
+        train_l = train_labelsubset
+
     train_dataset = CustomDataset(
         split = 'train',
-        img_paths=np.concatenate((train_datasubset,train_datasubset)),
-        labels=np.concatenate((train_labelsubset,train_labelsubset)),
+        img_paths= train_d,
+        labels= train_l,
         input_size = input_size
     )
     val_dataset = CustomDataset(
