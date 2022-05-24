@@ -125,7 +125,6 @@ class CustomDataset(Dataset):
                 if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
                     image = self.transform(image)
                 else: 
-                    print('AUGMENT')
                     image = self.transform_aug(image)
             else: 
                 image = self.transform(image)
