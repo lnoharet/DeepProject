@@ -36,17 +36,17 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
-ft_layers = 4 # idx 1-5 set how many layers to fine tune
+ft_layers = 5 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
 parameter_search_layer = '4' # set which layer to perform parameter search on. 
-lr_1 = 3e-10
-lr_2 = 3e-8
-lr_3 = 3e-7
+lr_1 = 1e-8
+lr_2 = 1e-7
+lr_3 = 1e-6
 lr_4 = 3e-6
-lr_fc = 0.00015
+lr_fc = 0.0001
 
 WD = 0
-NUM_AUGMENTS = 0
+NUM_AUGMENTS = 1
 
 """ SEARCH PARAMS """
 
@@ -72,42 +72,46 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Parameters
 num_classes = 37
 batch_size = 16
-num_epochs = 15
+num_epochs = 30
 
 class CustomDataset(Dataset):
-    def __init__(self, img_paths, labels, input_size, split, aug = False):
+    def __init__(self, img_paths, labels, input_size, split, aug = False, val=False):
             
         self.img_labels = labels
         self.img_paths = img_paths
         self.split = split
         
 
-        if split == 'trainval':
+        if split == 'train':
             self.transform = transforms.Compose([
-                # TODO: kolla om det är rätt transforms
-                #transforms.RandomResizedCrop(input_size),
                 transforms.Resize((input_size, input_size)),
-                #transforms.CenterCrop(input_size),
-                #transforms.RandomHorizontalFlip(),
-                #transforms.Resize(input_size),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
             self.transform_aug = transforms.Compose([
                 transforms.RandomRotation(20),
-                transforms.RandomResizedCrop(input_size),
+                transforms.CenterCrop(input_size),
+                #transforms.RandomResizedCrop(input_size),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
-        else: 
+        elif split == 'val': 
             self.transform = transforms.Compose([
-                transforms.Resize(input_size),
-                transforms.CenterCrop(input_size),
+                transforms.Resize((input_size,input_size)),
+                #transforms.CenterCrop(input_size),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                transforms.Normalize([-0.0147, -0.0353, -0.0414], [0.9746, 0.9883, 0.9882]) # val
             ])
-            self.transform_aug = None
+        else:
+            self.transform = transforms.Compose([
+                transforms.Resize((input_size,input_size)),
+                #transforms.CenterCrop(input_size),
+                transforms.ToTensor(),
+                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                transforms.Normalize([0.0228, -0.0047, -0.0324], [0.9970, 1.0091, 1.0116]) # test 
+            ])
    
     def __len__(self):
         return len(self.img_labels)
@@ -116,8 +120,8 @@ class CustomDataset(Dataset):
         image = load_image(self.img_paths[idx] + '.jpg')
         label = self.img_labels[idx]
         if AUGMENT:
-            if self.split == 'trainval':
-                if idx < int(len(self.img_paths)/2):    
+            if self.split == 'train':
+                if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
                     image = self.transform(image)
                 else: 
                     image = self.transform_aug(image)
@@ -203,6 +207,10 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler=None, num_ep
                         lrs.append(optimizer.param_groups[0]["lr"]) # track learning rate
                         if scheduler and SCHEDULE == '1cycle':
                             scheduler.step()
+
+
+                        # update batch_norm mean and var during training
+                        #model_ft.
 
 
                 # statistics
@@ -390,6 +398,7 @@ def pre_process_dataset(input_size, subset = None):
     for i in range(len(files)):
         with open(files[i]) as f:
             lines = f.readlines()
+            lines = np.random.permutation(lines)
             if subset:
                 for line in np.random.permutation(lines)[:subset]:
                     label = int(line.split(" ")[1]) - 1   
@@ -409,10 +418,16 @@ def pre_process_dataset(input_size, subset = None):
                     
 
 
-    trainingval_data = CustomDataset(
-        split = 'trainval',
-        img_paths=data[1],
-        labels=labels[1],
+    train_dataset = CustomDataset(
+        split = 'train',
+        img_paths=data[1][:int(len(data[1])*0.8)],
+        labels=labels[1][:int(len(data[1])*0.8)],
+        input_size = input_size
+    )
+    val_dataset = CustomDataset(
+        split = 'val',
+        img_paths=data[1][int(len(data[1])*0.8):],
+        labels=labels[1][int(len(data[1])*0.8):],
         input_size = input_size
     )
     test_data = CustomDataset(
@@ -422,8 +437,9 @@ def pre_process_dataset(input_size, subset = None):
         input_size = input_size
     )
     # Load training and validation datasets
-    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.8),int(len(trainingval_data)*0.2 ) ])
+    #train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.8),int(len(trainingval_data)*0.2 ) ])
     
+  
 
     # Create training and validation dataloaders
     dataloaders_dict = {'train': torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0),
@@ -438,6 +454,14 @@ def download_data():
     root = "data",
     download = True
     )
+
+def view_image(dataloader):
+    train_features, train_labels = next(iter(dataloader))    # Load a batch of data from dataloader
+    img = train_features[0].squeeze().permute(1,2,0)       # Take one image and reshape to (w, h, 3)
+    label = train_labels[0]
+    print(f"Label: {label}")
+    plt.imshow(img)
+    plt.show()
 
 
 def main():
@@ -465,7 +489,10 @@ def main():
     trainval_data, test_data = pre_process_dataset(input_size=input_size, subset=DATA_SUBSET)
     print(len(trainval_data['train']))
     print(len(trainval_data['val']))
+    #view_image(trainval_data['val'])
+    #view_image(trainval_data['train'])
 
+    
     if PARAM_SEARCH:
         ### Learning rate search:
         best_lr = parameter_search(trainval_data, params_to_update, test_data)
@@ -477,8 +504,8 @@ def main():
         if not LOAD_SAVE: 
             ## Adam
             optimizer_ft = optim.Adam(params_to_update)#, lr=used_lr)
-            if SCHEDULE == '1cycles':
-                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, 0.1, total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680/batch_size), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=False)
+            if SCHEDULE == '1cycle':
+                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer_ft, [0.0005, 8e-6, 5e-6, 5e-7, 5e-8], total_steps=None, epochs=num_epochs, steps_per_epoch=int(3680*0.8), pct_start=0.3, anneal_strategy='cos', cycle_momentum=True, base_momentum=0.85, max_momentum=0.95, div_factor=25.0, final_div_factor=10000.0, three_phase=False, last_epoch=- 1, verbose=True)
             if SCHEDULE == 'ExpLR':
                 scheduler =  torch.optim.lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.05, verbose= True)
             else:
@@ -491,8 +518,8 @@ def main():
 
             # Train and evaluate
             print('--- Training with adam ---')
-            model_ft, train_hist, hist, train_loss_hist, val_loss_hist,_ = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
-            
+            model_ft, train_hist, hist, train_loss_hist, val_loss_hist, lrs = train_model(model_ft, trainval_data, criterion, optimizer_ft, scheduler=scheduler,num_epochs=num_epochs, is_inception=(model_name=="inception"))
+            plot_lrs(lrs)            
 
         # Eval model on test data
         print('--- Testing model on testdata ---')
@@ -506,8 +533,22 @@ def main():
             plot(train_loss_hist, val_loss_hist, "loss", used_lr, round(test_acc,4))
             plot(train_hist, hist, "acc", used_lr, round(test_acc,4))
 
+    """ Calculate batch mean and std"""
+    if False:
+        dataloader = test_data['test']
+        mean = 0
+        std = 0
+        for images, _ in dataloader:
+            batch_samples = images.size(0) # batch size
+            images = images.view(batch_samples, images.size(1), -1)
+            mean += images.mean(2).sum(0)
+            std += images.std(2).sum(0)
 
+        mean /= len(dataloader.dataset)
+        std /= len(dataloader.dataset)
 
+        print(mean)
+        print(std)
 
 
 
