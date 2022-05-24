@@ -46,7 +46,7 @@ lr_4 = 3e-6
 lr_fc = 0.0001
 
 WD = 0
-NUM_AUGMENTS = 1
+NUM_AUGMENTS = 2
 if NUM_AUGMENTS > 0:
     AUGMENT = True
 
