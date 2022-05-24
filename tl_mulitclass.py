@@ -90,6 +90,8 @@ class CustomDataset(Dataset):
                 transforms.Resize(input_size),
                 transforms.CenterCrop(input_size),
                 #transforms.Resize((input_size, input_size)),
+
+                #transforms.Resize((input_size, input_size)),
                 transforms.ToTensor(),
                 #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                 transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
