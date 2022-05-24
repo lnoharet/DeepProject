@@ -18,10 +18,10 @@ import copy
 from glob import glob
 from PIL import Image
 
-#seed_ = 0.444
-#torch.manual_seed(seed_)
-#torch.cuda.manual_seed_all(seed_)
-#torch.backends.cudnn.deterministic = True
+seed_ = 0.444
+torch.manual_seed(seed_)
+torch.cuda.manual_seed_all(seed_)
+torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
@@ -90,8 +90,8 @@ class CustomDataset(Dataset):
                 transforms.CenterCrop(input_size),
                 #transforms.Resize((input_size, input_size)),
                 transforms.ToTensor(),
-                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-                transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                #transforms.Normalize([-0.0339, -0.0499, -0.0551], [0.9832, 0.9904, 0.9911]) # train
             ])
             self.transform_aug = transforms.Compose([
                 #transforms.RandomRotation(20),
@@ -110,7 +110,9 @@ class CustomDataset(Dataset):
                 #transforms.Resize((input_size,input_size)),
                 #transforms.CenterCrop(input_size),
                 transforms.ToTensor(),
-                transforms.Normalize([-0.0147, -0.0353, -0.0414], [0.9746, 0.9883, 0.9882]) # val
+                #transforms.Normalize([-0.0147, -0.0353, -0.0414], [0.9746, 0.9883, 0.9882]) # val
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+
             ])
         else:
             self.transform = transforms.Compose([
@@ -120,8 +122,8 @@ class CustomDataset(Dataset):
                 #transforms.Resize((input_size,input_size)),
                 #transforms.CenterCrop(input_size),
                 transforms.ToTensor(),
-                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-                transforms.Normalize([0.0228, -0.0047, -0.0324], [0.9970, 1.0091, 1.0116]) # test 
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                #transforms.Normalize([0.0228, -0.0047, -0.0324], [0.9970, 1.0091, 1.0116]) # test 
             ])
    
     def __len__(self):
