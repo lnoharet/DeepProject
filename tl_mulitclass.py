@@ -295,6 +295,7 @@ def initialize_model(model_name, num_classes, fc_lr = lr_fc, lay4_lr = lr_4, lay
     elif model_name == "resnet50":
         """ Resnet50 """
         model_ft = models.resnet50(pretrained=use_pretrained)
+    print(model_ft)
     """ Set layers to be fine-tuned """
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, num_classes)
