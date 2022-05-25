@@ -69,7 +69,7 @@ coarse_lr = np.array(coarse_lr)
 
 
 # Models from [resnet18, resnet34]
-model_name = "restnet50"#"resnet18"
+model_name = "restnet34"#"resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
