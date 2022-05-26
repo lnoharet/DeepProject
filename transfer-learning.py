@@ -19,10 +19,10 @@ import copy
 from glob import glob
 from PIL import Image
 
-seed_ = 0.444
-torch.manual_seed(seed_)
-torch.cuda.manual_seed_all(seed_)
-torch.backends.cudnn.deterministic = True
+#seed_ = 0.444
+#torch.manual_seed(seed_)
+#torch.cuda.manual_seed_all(seed_)
+#torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
@@ -55,8 +55,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Parameters
 num_classes = 2
 batch_size = 16
-num_epochs = 40
-default_lr = 0.001
+num_epochs = 50
+default_lr = 0.0009
 
 
 class CustomDataset(Dataset):
