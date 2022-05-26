@@ -55,7 +55,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Parameters
 num_classes = 2
 batch_size = 16
-num_epochs = 50
+num_epochs = 40
 default_lr = 0.00115
 
 
