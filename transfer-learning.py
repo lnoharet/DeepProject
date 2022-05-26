@@ -26,8 +26,8 @@ torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
-TRAINING     = False
-BASELINE     = True
+TRAINING     = True
+BASELINE     = False
 
 # Top level data directory.
 data_dir = "./data/oxford-iiit-pet"
@@ -54,8 +54,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 8
-num_epochs = 15
+batch_size = 16
+num_epochs = 40
 default_lr = 0.001
 
 
