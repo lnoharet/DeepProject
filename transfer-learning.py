@@ -56,7 +56,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_classes = 2
 batch_size = 16
 num_epochs = 50
-default_lr = 0.0009
+default_lr = 0.00115
 
 
 class CustomDataset(Dataset):
@@ -341,7 +341,7 @@ def pre_process_dataset(input_size, subset = None):
         input_size = input_size
     )
     # Load training and validation datasets
-    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.8),int(len(trainingval_data)*0.2 ) ])
+    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.7),int(len(trainingval_data)*0.3 ) ])
     
 
     # Create training and validation dataloaders
