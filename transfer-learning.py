@@ -54,8 +54,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 32
-num_epochs = 40
+batch_size = 16#32
+num_epochs = 15#40
 default_lr = 0.001
 
 
@@ -257,7 +257,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.plot(train, label='train')
     plt.xlabel('epoch')
     plt.ylabel(mode)
-    plt.title(mode + ' with lr=' + str(used_lr) + ' n_batch=' + str(batch_size) + ' test_acc=' + str(test_acc))
+    plt.title('test_acc=' + str(test_acc))
     plt.legend()
     if mode == "loss":  plt.ylim([0, 1])
     else:               plt.ylim([0.5, 1])
@@ -383,7 +383,7 @@ def main():
         used_lr = default_lr
 
         ## Adam
-        optimizer_ft = optim.Adam(params_to_update, lr=used_lr)
+        optimizer_ft = optim.AdamW(params_to_update, lr=used_lr)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
