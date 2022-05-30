@@ -19,10 +19,10 @@ import copy
 from glob import glob
 from PIL import Image
 
-#seed_ = 0.444
-#torch.manual_seed(seed_)
-#torch.cuda.manual_seed_all(seed_)
-#torch.backends.cudnn.deterministic = True
+seed_ = 0.444
+torch.manual_seed(seed_)
+torch.cuda.manual_seed_all(seed_)
+torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
