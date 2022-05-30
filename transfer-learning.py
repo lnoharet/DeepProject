@@ -19,10 +19,10 @@ import copy
 from glob import glob
 from PIL import Image
 
-seed_ = 0.444
-torch.manual_seed(seed_)
-torch.cuda.manual_seed_all(seed_)
-torch.backends.cudnn.deterministic = True
+#seed_ = 0.444
+#torch.manual_seed(seed_)
+#torch.cuda.manual_seed_all(seed_)
+#torch.backends.cudnn.deterministic = True
 
 """ Runnning Options """
 PARAM_SEARCH = False
@@ -339,7 +339,7 @@ def pre_process_dataset(input_size, subset = None):
         input_size = input_size
     )
     # Load training and validation datasets
-    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.7),int(len(trainingval_data)*0.3 ) ])
+    train_dataset, val_dataset = torch.utils.data.random_split(trainingval_data, [int(len(trainingval_data)*0.85),int(len(trainingval_data)*0.15 ) ])
     
 
     # Create training and validation dataloaders
