@@ -383,7 +383,7 @@ def main():
         used_lr = default_lr
 
         ## Adam
-        optimizer_ft = optim.AdamW(params_to_update, lr=used_lr)
+        optimizer_ft = optim.AdamW(params_to_update, lr=used_lr,  weight_decay=0.001)
         # Setup the loss fxn
         criterion = nn.CrossEntropyLoss()
 
