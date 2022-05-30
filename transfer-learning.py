@@ -54,9 +54,9 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 2
-batch_size = 16
+batch_size = 32
 num_epochs = 40
-default_lr = 0.00115
+default_lr = 0.001
 
 
 class CustomDataset(Dataset):
@@ -132,9 +132,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
             running_corrects = 0
 
             # Iterate over data.
-            count = 0
             for inputs, labels in dataloaders[phase]:
-                count+=1
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
