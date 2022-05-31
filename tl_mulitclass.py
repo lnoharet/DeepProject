@@ -69,7 +69,7 @@ coarse_lr = np.array(coarse_lr)
 
 
 # Models from [resnet18, resnet34]
-model_name = "resnet152"#"resnet18"
+model_name = "resnet18"#"resnet18"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
@@ -344,7 +344,7 @@ def plot(train, val, mode, used_lr, test_acc):
     plt.plot(train, label='train')
     plt.xlabel('epoch')
     plt.ylabel(mode)
-    plt.title(mode + ' with lr=' + str(used_lr) + ' n_batch=' + str(batch_size) + ' test_acc=' + str(test_acc))
+    plt.title('test_acc=' + str(test_acc))
     plt.legend()
     if mode == "acc":  plt.ylim([0, 1])
     plt.savefig('mul_plots/' + mode + str(round(time.time()) - 1650000000)+str(model_name[6])+str(model_name[7]) +"_lay"+ str(ft_layers)+"_bs"+str(batch_size)+"_eph"+str(num_epochs)+'.png')
