@@ -134,12 +134,15 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         image = load_image(self.img_paths[idx] + '.jpg')
         label = self.img_labels[idx]
+        print(idx)
         if AUGMENT:
             if self.split == 'train':
                 if idx > len(self.img_paths)/(NUM_AUGMENTS+1):
+
                 #if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
                     image = self.transform(image)
-                else: 
+                else:
+                     
                     image = self.transform_aug(image)
             else: 
                 image = self.transform(image)
