@@ -75,7 +75,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Parameters
 num_classes = 37
 batch_size = 16
-num_epochs = 15#40
+num_epochs = 40
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split, aug = False, val=False):
@@ -100,7 +100,7 @@ class CustomDataset(Dataset):
                 transforms.Resize((input_size, input_size)),
                 transforms.CenterCrop(input_size),
                 transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(0.5, 0.1),
+                #transforms.ColorJitter(0.5, 0.1),
                 #transforms.GaussianBlur((5,9), sigma = (0.1, 0.2)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
