@@ -37,7 +37,7 @@ default_lr = 0.0001 # best lr for FC layer
 
 
 BN = False # false = exclude BN params from fine tuning
-ft_layers = 5 # idx 1-5 set how many layers to fine tune
+ft_layers = 1 # idx 1-5 set how many layers to fine tune
 layers = ["fc", 'layer4', 'layer3', 'layer2', 'layer1']
 parameter_search_layer = '4' # set which layer to perform parameter search on. 
 lr_1 = 1e-8
@@ -74,8 +74,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Parameters
 num_classes = 37
-batch_size = 16
-num_epochs = 40
+batch_size = 8
+num_epochs = 15
 
 class CustomDataset(Dataset):
     def __init__(self, img_paths, labels, input_size, split, aug = False, val=False):
@@ -83,7 +83,6 @@ class CustomDataset(Dataset):
         self.img_labels = labels
         self.img_paths = img_paths
         self.split = split
-        
 
         if split == 'train':
             self.transform = transforms.Compose([
@@ -99,7 +98,7 @@ class CustomDataset(Dataset):
             self.transform_aug = transforms.Compose([
                 transforms.Resize((input_size, input_size)),
                 transforms.CenterCrop(input_size),
-                transforms.RandomHorizontalFlip(),
+                transforms.RandomHorizontalFlip(p=1.0),
                 #transforms.ColorJitter(0.5, 0.1),
                 #transforms.GaussianBlur((5,9), sigma = (0.1, 0.2)),
                 transforms.ToTensor(),
@@ -138,11 +137,9 @@ class CustomDataset(Dataset):
         if AUGMENT:
             if self.split == 'train':
                 if idx > len(self.img_paths)/(NUM_AUGMENTS+1):
-
                 #if random.random() <= 1/(NUM_AUGMENTS+1): # Some proportion of training data is augmented  
                     image = self.transform(image)
                 else:
-                     
                     image = self.transform_aug(image)
             else: 
                 image = self.transform(image)
