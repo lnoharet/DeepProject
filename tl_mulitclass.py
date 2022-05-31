@@ -565,7 +565,7 @@ def main():
             
 
             # Setup the loss fxn
-            criterion = nn.CrossEntropyLoss()
+            criterion = nn.BCELoss()#nn.CrossEntropyLoss()
 
             # Train and evaluate
             print('--- Training with adam ---')
