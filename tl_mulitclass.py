@@ -133,7 +133,6 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         image = load_image(self.img_paths[idx] + '.jpg')
         label = self.img_labels[idx]
-        print(idx)
         if AUGMENT:
             if self.split == 'train':
                 if idx > len(self.img_paths)/(NUM_AUGMENTS+1):
